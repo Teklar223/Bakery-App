@@ -12,14 +12,16 @@ class SharedViewModel: ViewModel() {
 
     fun saveData(
         user: UserData,
-        context: Context
+        context: Context,
+        navController: NavController
     ) = CoroutineScope(Dispatchers.IO).launch {
         try {
-            database.collection("profiles")
+            database.collection(profilesCol)
                 .add(user)
                 // TODO: can we use our own id instead of the auto generated? AND do we need to?
                 .addOnSuccessListener {
                     Toast.makeText(context, "successfully saved data", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()
                 }
         }
         catch (e: Exception){
@@ -30,35 +32,33 @@ class SharedViewModel: ViewModel() {
     fun retrieveData(
         userID: String,
         context: Context,
-        data: (UserData) -> Unit,
+        navController: NavController,
+        data: (UserData) -> Unit
     ) = CoroutineScope(Dispatchers.IO).launch {
-        /* TODO!
-        val firestoreRef = Firebase.firestore
-            .collection("user")
-            .document(userID)
-
         try {
-            firestoreRef.get()
+            database.collection(profilesCol)
+                .whereEqualTo("userID",userID)
+                .get()
                 .addOnSuccessListener {
-                    if (it.exists()){
-                        val userData = it.toObject<UserData>()!!
-                        data(userData) // if null, returns 'Unit' class (singleton).
-                    }
-                    else{
-                        Toast.makeText(context, "No user data found!", Toast.LENGTH_SHORT).show()
-                    }
+                    Toast.makeText(context, "Logging you in!", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(
+                        context,
+                        "Could not retrieve your information, make sure it's accurate!",
+                        Toast.LENGTH_SHORT).show()
                 }
         }
         catch (e: Exception){
             Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
         }
-         */
     }
 
     fun deleteData(
         userID: String,
         context: Context,
-        navController: NavController,
+        navController: NavController
     ) = CoroutineScope(Dispatchers.IO).launch {
         /* TODO!
         val firestoreRef = Firebase.firestore

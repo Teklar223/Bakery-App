@@ -5,11 +5,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -17,13 +13,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bakeryapp.util.SharedViewModel
-import com.example.bakeryapp.util.UserData
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
-fun AddDataScreen(
+fun LoginScreen(
     navController: NavController,
     sharedViewModel: SharedViewModel
 ){
@@ -64,16 +56,42 @@ fun AddDataScreen(
             verticalArrangement = Arrangement.Center
         ) {
             /** User ID **/
-            OutlinedTextField(
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                value = userID,
-                onValueChange = {
-                    userID = it
-                },
-                label = {
-                    Text(text = "User ID")
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(0.6f),
+                    value = userID,
+                    onValueChange = {
+                        userID = it
+                    },
+                    label = {
+                        Text(text = "User ID")
+                    }
+                )
+                // get user data button
+                Button(
+                    modifier = Modifier
+                        .padding(start = 10.dp)
+                        .width(100.dp),
+                    onClick = {
+                        sharedViewModel.retrieveData(
+                            userID = userID,
+                            context = context,
+                            navController = navController
+                        ){data ->
+                            firstName = data.firstName
+                            lastName = data.lastName
+                            age = data.age.toString()
+                            email = data.email
+                        }
+                    }
+                ){
+                    Text(text = "Get Data")
                 }
-            )
+            }
+
             /** First Name **/
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
@@ -122,25 +140,20 @@ fun AddDataScreen(
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
-            /** Save Button **/
+            /** Delete Button **/
             Button(
                 modifier = Modifier
-                    .padding(top = 50.dp)
+                    .padding(top = 20.dp)
                     .fillMaxWidth(),
                 onClick = {
-                    val userData = UserData(
+                    sharedViewModel.deleteData(
                         userID = userID,
-                        firstName = firstName,
-                        lastName = lastName,
-                        age = age.toInt(), //!! -1, TODO: different handling of null, and reason why we don't need ageInt?
-                        //https://kotlinlang.org/docs/null-safety.html#the-operator
-                        email = email
+                        context = context,
+                        navController = navController
                     )
-
-                    sharedViewModel.saveData(user = userData, context = context)
                 }
             ) {
-                Text(text = "Save")
+                Text(text = "Delete")
             }
         }
     }

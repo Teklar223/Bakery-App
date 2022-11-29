@@ -5,7 +5,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -16,7 +20,7 @@ import com.example.bakeryapp.util.SharedViewModel
 import com.example.bakeryapp.util.UserData
 
 @Composable
-fun GetDataScreen(
+fun RegisterScreen(
     navController: NavController,
     sharedViewModel: SharedViewModel
 ){
@@ -25,7 +29,7 @@ fun GetDataScreen(
     var lastName: String by remember { mutableStateOf("") }
     var email: String by remember { mutableStateOf("") }
     var age: String by remember { mutableStateOf("") }
-    var ageInt: Int by remember { mutableStateOf(0) } //TODO: do we need this separation?
+    var ageInt: Int by remember { mutableStateOf(0) }
 
     val context = LocalContext.current
 
@@ -57,41 +61,16 @@ fun GetDataScreen(
             verticalArrangement = Arrangement.Center
         ) {
             /** User ID **/
-            Row(
+            OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(0.6f),
-                    value = userID,
-                    onValueChange = {
-                        userID = it
-                    },
-                    label = {
-                        Text(text = "User ID")
-                    }
-                )
-                // get user data button
-                Button(
-                    modifier = Modifier
-                        .padding(start = 10.dp)
-                        .width(100.dp),
-                    onClick = {
-                        sharedViewModel.retrieveData(
-                            userID = userID,
-                            context = context
-                        ){data ->
-                            firstName = data.firstName
-                            lastName = data.lastName
-                            age = data.age.toString()
-                            email = data.email
-                        }
-                    }
-                ){
-                    Text(text = "Get Data")
+                value = userID,
+                onValueChange = {
+                    userID = it
+                },
+                label = {
+                    Text(text = "User ID")
                 }
-            }
-
+            )
             /** First Name **/
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
@@ -130,7 +109,7 @@ fun GetDataScreen(
                 modifier = Modifier.fillMaxWidth(),
                 value = age,
                 onValueChange = {
-                    age = it                         //TODO: age + ageInt separation plays here
+                    age = it
                     if (age.isNotEmpty()) {
                         ageInt = age.toInt()
                     }
@@ -140,20 +119,28 @@ fun GetDataScreen(
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
-            /** Delete Button **/
+            /** Save Button **/
             Button(
                 modifier = Modifier
-                    .padding(top = 20.dp)
+                    .padding(top = 50.dp)
                     .fillMaxWidth(),
                 onClick = {
-                    sharedViewModel.deleteData(
+                    val userData = UserData(
                         userID = userID,
+                        firstName = firstName,
+                        lastName = lastName,
+                        age = age.toInt(),
+                        email = email
+                    )
+
+                    sharedViewModel.saveData(
+                        user = userData,
                         context = context,
                         navController = navController
                     )
                 }
             ) {
-                Text(text = "Delete")
+                Text(text = "Save")
             }
         }
     }

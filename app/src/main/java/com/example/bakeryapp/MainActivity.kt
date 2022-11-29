@@ -19,12 +19,13 @@ import com.example.bakeryapp.ui.theme.BakeryTheme
 import com.example.bakeryapp.util.SharedViewModel
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.database
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var navController: NavHostController
-    private val database = Firebase.database("https://bakeryfirestore-default-rtdb.europe-west1.firebasedatabase.app")
+    private val database = Firebase.firestore
     //private lateinit var database: DatabaseReference
     private val sharedViewModel: SharedViewModel by viewModels()
 

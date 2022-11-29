@@ -8,12 +8,13 @@ import com.example.bakeryapp.screen.*
 import com.example.bakeryapp.util.SharedViewModel
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun NavGraph(
     navController: NavHostController,
     sharedViewModel: SharedViewModel,
-    database: FirebaseDatabase
+    database: FirebaseFirestore
 ){
     NavHost(
         navController = navController,

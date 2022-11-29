@@ -20,12 +20,13 @@ import com.example.bakeryapp.util.SharedViewModel
 import com.example.bakeryapp.util.UserData
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun AddDataScreen(
     navController: NavController,
     sharedViewModel: SharedViewModel,
-    database: FirebaseDatabase
+    database: FirebaseFirestore
 ){
     var userID: String by remember { mutableStateOf("") }
     var firstName: String by remember { mutableStateOf("") }
@@ -137,7 +138,7 @@ fun AddDataScreen(
                         email = email
                     )
 
-                    sharedViewModel.saveData(userData = userData, context = context, database = database)
+                    sharedViewModel.saveData(user = userData, context = context, database = database)
                 }
             ) {
                 Text(text = "Save")

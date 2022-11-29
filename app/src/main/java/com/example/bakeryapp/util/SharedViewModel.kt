@@ -4,7 +4,6 @@ import android.content.Context
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -13,12 +12,12 @@ class SharedViewModel: ViewModel() {
 
     fun saveData(
         user: UserData,
-        context: Context,
-        database: FirebaseFirestore //TODO: try to pass in constructor instead !
+        context: Context
     ) = CoroutineScope(Dispatchers.IO).launch {
         try {
             database.collection("profiles")
-                .add(user)// TODO: can we use our own id instead of the auto generated? AND do we need to?
+                .add(user)
+                // TODO: can we use our own id instead of the auto generated? AND do we need to?
                 .addOnSuccessListener {
                     Toast.makeText(context, "successfully saved data", Toast.LENGTH_SHORT).show()
                 }

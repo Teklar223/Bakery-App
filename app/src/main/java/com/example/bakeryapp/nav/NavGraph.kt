@@ -13,8 +13,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    sharedViewModel: SharedViewModel,
-    database: FirebaseFirestore
+    sharedViewModel: SharedViewModel
 ){
     NavHost(
         navController = navController,
@@ -43,8 +42,7 @@ fun NavGraph(
         ){
             AddDataScreen(
                 navController = navController,
-                sharedViewModel = sharedViewModel,
-                database = database
+                sharedViewModel = sharedViewModel
             )
         }
     }

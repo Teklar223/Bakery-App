@@ -25,8 +25,6 @@ import com.google.firebase.ktx.Firebase
 class MainActivity : ComponentActivity() {
 
     private lateinit var navController: NavHostController
-    private val database = Firebase.firestore
-    //private lateinit var database: DatabaseReference
     private val sharedViewModel: SharedViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,8 +39,7 @@ class MainActivity : ComponentActivity() {
                     //database = Firebase.database.reference
                     NavGraph(
                         navController = navController,
-                        sharedViewModel = sharedViewModel,
-                        database = database
+                        sharedViewModel = sharedViewModel
                     )
                 }
             }

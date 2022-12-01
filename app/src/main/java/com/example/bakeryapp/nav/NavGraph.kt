@@ -6,14 +6,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.bakeryapp.screen.*
 import com.example.bakeryapp.util.SharedViewModel
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    sharedViewModel: SharedViewModel,
-    database: FirebaseDatabase
+    sharedViewModel: SharedViewModel
 ){
     NavHost(
         navController = navController,
@@ -29,21 +26,20 @@ fun NavGraph(
         }
         /* *** GET DATA SCREEN *** */
         composable(
-            route = Screens.GetDataScreen.route
+            route = Screens.LoginScreen.route
         ){
-            GetDataScreen(
+            LoginScreen(
                 navController = navController,
                 sharedViewModel = sharedViewModel
             )
         }
         /* *** ADD DATA SCREEN *** */
         composable(
-            route = Screens.AddDataScreen.route
+            route = Screens.RegisterScreen.route
         ){
-            AddDataScreen(
+            RegisterScreen(
                 navController = navController,
-                sharedViewModel = sharedViewModel,
-                database = database
+                sharedViewModel = sharedViewModel
             )
         }
     }

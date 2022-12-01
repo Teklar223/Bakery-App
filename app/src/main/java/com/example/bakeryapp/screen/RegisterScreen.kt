@@ -18,21 +18,18 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bakeryapp.util.SharedViewModel
 import com.example.bakeryapp.util.UserData
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 
 @Composable
-fun AddDataScreen(
+fun RegisterScreen(
     navController: NavController,
-    sharedViewModel: SharedViewModel,
-    database: FirebaseDatabase
+    sharedViewModel: SharedViewModel
 ){
     var userID: String by remember { mutableStateOf("") }
     var firstName: String by remember { mutableStateOf("") }
     var lastName: String by remember { mutableStateOf("") }
     var email: String by remember { mutableStateOf("") }
     var age: String by remember { mutableStateOf("") }
-    var ageInt: Int by remember { mutableStateOf(0) } //TODO: do we need this separation?
+    var ageInt: Int by remember { mutableStateOf(0) }
 
     val context = LocalContext.current
 
@@ -112,7 +109,7 @@ fun AddDataScreen(
                 modifier = Modifier.fillMaxWidth(),
                 value = age,
                 onValueChange = {
-                    age = it                         //TODO: age + ageInt separation plays here
+                    age = it
                     if (age.isNotEmpty()) {
                         ageInt = age.toInt()
                     }
@@ -132,12 +129,15 @@ fun AddDataScreen(
                         userID = userID,
                         firstName = firstName,
                         lastName = lastName,
-                        age = age.toInt(), //!! -1, TODO: different handling of null, and reason why we don't need ageInt?
-                        //https://kotlinlang.org/docs/null-safety.html#the-operator
+                        age = age.toInt(),
                         email = email
                     )
 
-                    sharedViewModel.saveData(userData = userData, context = context, database = database)
+                    sharedViewModel.saveData(
+                        user = userData,
+                        context = context,
+                        navController = navController
+                    )
                 }
             ) {
                 Text(text = "Save")

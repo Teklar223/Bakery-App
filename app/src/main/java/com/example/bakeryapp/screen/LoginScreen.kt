@@ -13,10 +13,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bakeryapp.util.SharedViewModel
-import com.example.bakeryapp.util.UserData
 
 @Composable
-fun GetDataScreen(
+fun LoginScreen(
     navController: NavController,
     sharedViewModel: SharedViewModel
 ){
@@ -79,7 +78,8 @@ fun GetDataScreen(
                     onClick = {
                         sharedViewModel.retrieveData(
                             userID = userID,
-                            context = context
+                            context = context,
+                            navController = navController
                         ){data ->
                             firstName = data.firstName
                             lastName = data.lastName

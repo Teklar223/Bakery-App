@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bakeryapp.nav.Screens
-import com.example.bakeryapp.util.SharedViewModel
 
 @Composable
 fun MainScreen(
@@ -27,20 +26,30 @@ fun MainScreen(
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
-                navController.navigate(route = Screens.GetDataScreen.route)
+                navController.navigate(route = Screens.LoginScreen.route)
             }
         ){
             Text(text = "Get User Data")
         }
 
-        /* ADD user button */
+        /** ADD user button */
         OutlinedButton(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
-                navController.navigate(route = Screens.AddDataScreen.route)
+                navController.navigate(route = Screens.RegisterScreen.route)
             }
         ){
             Text(text = "Add User Data")
+        }
+
+        /** Logout Button */
+        OutlinedButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = {
+                navController.navigate(route = Screens.RegisterScreen.route)
+            }
+        ){
+            Text(text = "logout")
         }
     }
 }

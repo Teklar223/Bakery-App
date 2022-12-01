@@ -7,29 +7,42 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.bakeryapp.nav.NavGraph
 import com.example.bakeryapp.ui.theme.BakeryTheme
 import com.example.bakeryapp.util.SharedViewModel
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ktx.database
+import com.firebase.ui.auth.AuthUI
+import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
+import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+
 
 class MainActivity : ComponentActivity() {
 
-    private lateinit var navController: NavHostController
-    private val database = Firebase.database("https://bakeryfirestore-default-rtdb.europe-west1.firebasedatabase.app")
-    //private lateinit var database: DatabaseReference
     private val sharedViewModel: SharedViewModel by viewModels()
+    private var user: FirebaseUser? = null
+    private lateinit var navController: NavHostController
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        auth = FirebaseAuth.getInstance()
+        user = auth.currentUser
+        if(user != null){
+            showMain() //already signed in
+        }
+        else{
+            showLogin() //not signed in
+        }
+
+    }
+
+    private fun showMain(){
         setContent {
             BakeryTheme{
                 Surface(
@@ -37,14 +50,40 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ){
                     navController = rememberNavController()
-                    //database = Firebase.database.reference
+                    auth = Firebase.auth
                     NavGraph(
                         navController = navController,
-                        sharedViewModel = sharedViewModel,
-                        database = database
+                        sharedViewModel = sharedViewModel
                     )
                 }
             }
         }
     }
+    private fun showLogin(){
+        startSignIn()
+    }
+
+    private val signInLauncher = registerForActivityResult(
+        FirebaseAuthUIActivityResultContract()
+    ) { result: FirebaseAuthUIAuthenticationResult? ->
+        //handle auth result
+        result.toString()
+    }
+
+    private fun startSignIn() {
+        val providers = arrayListOf( //todo: should move to constants - if possible
+            AuthUI.IdpConfig.EmailBuilder().build()/*,
+            AuthUI.IdpConfig.PhoneBuilder().build(),
+            AuthUI.IdpConfig.GoogleBuilder().build(),
+            AuthUI.IdpConfig.FacebookBuilder().build(),
+            AuthUI.IdpConfig.TwitterBuilder().build()*/)
+
+        val signInIntent = AuthUI.getInstance()
+            .createSignInIntentBuilder()
+            .setTheme(R.style.Theme_BakeryApp)
+            .setAvailableProviders(providers)
+            .build()
+        signInLauncher.launch(signInIntent)
+    }
+
 }

@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun startSignIn() {
-        val providers = arrayListOf( //todo: should move to constants, see if possible
+        val providers = arrayListOf( //todo: should move to constants - if possible
             AuthUI.IdpConfig.EmailBuilder().build()/*,
             AuthUI.IdpConfig.PhoneBuilder().build(),
             AuthUI.IdpConfig.GoogleBuilder().build(),

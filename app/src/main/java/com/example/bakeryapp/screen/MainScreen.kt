@@ -32,7 +32,7 @@ fun MainScreen(
             Text(text = "Get User Data")
         }
 
-        /* ADD user button */
+        /** ADD user button */
         OutlinedButton(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
@@ -40,6 +40,16 @@ fun MainScreen(
             }
         ){
             Text(text = "Add User Data")
+        }
+
+        /** Logout Button */
+        OutlinedButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = {
+                navController.navigate(route = Screens.RegisterScreen.route)
+            }
+        ){
+            Text(text = "logout")
         }
     }
 }

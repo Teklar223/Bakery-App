@@ -12,6 +12,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.bakeryapp.nav.NavGraph
 import com.example.bakeryapp.ui.theme.BakeryTheme
+import com.example.bakeryapp.util.AuthInfo
 import com.example.bakeryapp.util.SharedViewModel
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
@@ -25,20 +26,20 @@ import com.google.firebase.ktx.Firebase
 class MainActivity : ComponentActivity() {
 
     private val sharedViewModel: SharedViewModel by viewModels()
-    private var user: FirebaseUser? = null
     private lateinit var navController: NavHostController
-    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        auth = FirebaseAuth.getInstance()
-        user = auth.currentUser
-        if(user != null){
-            showMain() //already signed in
-        }
-        else{
-            showLogin() //not signed in
-        }
+
+        //initiating auth
+        AuthInfo.auth = FirebaseAuth.getInstance()
+        AuthInfo.user = AuthInfo.auth.currentUser
+
+        //initiating screens
+        showMain()
+
+        //TODO: move this functionality to the login screen
+        //showLogin() //not signed in
 
     }
 
@@ -50,7 +51,6 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ){
                     navController = rememberNavController()
-                    auth = Firebase.auth
                     NavGraph(
                         navController = navController,
                         sharedViewModel = sharedViewModel
@@ -66,7 +66,7 @@ class MainActivity : ComponentActivity() {
     private val signInLauncher = registerForActivityResult(
         FirebaseAuthUIActivityResultContract()
     ) { result: FirebaseAuthUIAuthenticationResult? ->
-        //handle auth result
+        //TODO: handle auth result
         result.toString()
     }
 

@@ -1,161 +1,208 @@
 package com.example.bakeryapp.screen
 
+import android.annotation.SuppressLint
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.bakeryapp.R
 import com.example.bakeryapp.util.SharedViewModel
-import com.google.firebase.auth.FirebaseAuth
+import com.firebase.ui.auth.AuthUI
+import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
+import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.icons.filled.MailOutline
+import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.ExitToApp
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import com.example.bakeryapp.util.AuthInfo
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.GoogleAuthProvider
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun LoginScreen(
     navController: NavController,
     sharedViewModel: SharedViewModel
 ){
-    var userID: String by remember { mutableStateOf("") }
-    var firstName: String by remember { mutableStateOf("") }
-    var lastName: String by remember { mutableStateOf("") }
-    var email: String by remember { mutableStateOf("") }
-    var age: String by remember { mutableStateOf("") }
-    var ageInt: Int by remember { mutableStateOf(0) } //TODO: do we need this separation?
+    var userEmail by remember { mutableStateOf("") }
+    var userPassword by remember { mutableStateOf("") }
 
-    val context = LocalContext.current
-
-    /** main layout **/
-
-    Column(modifier = Modifier.fillMaxSize()) {
-        /** Back button **/
-        Row(
-            modifier = Modifier
-                .padding(start = 15.dp, top = 15.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start
-        ){
-            IconButton(
-                onClick = {
-                    navController.popBackStack()
-                }
-            ){
-                Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "back button")
-            }
-        }
-
-        /** GET data layout **/
-        Column(
-            modifier = Modifier
-                .padding(start = 60.dp, end = 60.dp, bottom = 50.dp)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            /** User ID **/
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(0.6f),
-                    value = userID,
-                    onValueChange = {
-                        userID = it
-                    },
-                    label = {
-                        Text(text = "User ID")
-                    }
-                )
-                // get user data button
-                Button(
-                    modifier = Modifier
-                        .padding(start = 10.dp)
-                        .width(100.dp),
-                    onClick = {
-                        sharedViewModel.retrieveData(
-                            userID = userID,
-                            context = context,
-                            navController = navController
-                        ){data ->
-                            firstName = data.firstName
-                            lastName = data.lastName
-                            age = data.age.toString()
-                            email = data.email
-                        }
-                    }
-                ){
-                    Text(text = "Get Data")
-                }
-            }
-
-            /** First Name **/
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = firstName,
-                onValueChange = {
-                    firstName = it
-                },
-                label = {
-                    Text(text = "First Name")
-                }
-            )
-            /** Last Name **/
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = lastName,
-                onValueChange = {
-                    lastName = it
-                },
-                label = {
-                    Text(text = "Last Name")
-                }
-            )
-            /** Email **/
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = email,
-                onValueChange = {
-                    email = it
-                },
-                label = {
-                    Text(text = "Email")
-                }
-            )
-            /** Age **/
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = age,
-                onValueChange = {
-                    age = it                         //TODO: age + ageInt separation plays here
-                    if (age.isNotEmpty()) {
-                        ageInt = age.toInt()
-                    }
-                },
-                label = {
-                    Text(text = "Age")
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-            /** Delete Button **/
-            Button(
-                modifier = Modifier
-                    .padding(top = 20.dp)
-                    .fillMaxWidth(),
-                onClick = {
-                    sharedViewModel.deleteData(
-                        userID = userID,
-                        context = context,
-                        navController = navController
-                    )
-                }
-            ) {
-                Text(text = "Delete")
-            }
+    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
+        val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
+        try {
+            val account = task.getResult(ApiException::class.java)!!
+            val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
+            //viewModel.signWithCredential(credential)
+        } catch (e: ApiException) {
+            //Log.w("TAG", "Google sign in failed", e)
         }
     }
+
+    Scaffold(
+    topBar = {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            TopAppBar(
+                backgroundColor = Color.White,
+                elevation = 1.dp,
+                title = {
+                    Text(text = "Login")
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.Rounded.ArrowBack,
+                            contentDescription = null,
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { AuthInfo.auth.signOut() }) {
+                        Icon(
+                            imageVector = Icons.Rounded.ExitToApp,
+                            contentDescription = null,
+                        )
+                    }
+                }
+            )
+        }
+    },
+    content = {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            content = {
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = userEmail,
+                    label = {
+                        Text(text = "Email")
+                    },
+                    onValueChange = {
+                        userEmail = it
+                    }
+                )
+
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    visualTransformation = PasswordVisualTransformation(),
+                    value = userPassword,
+                    label = {
+                        Text(text = "Password")
+                    },
+                    onValueChange = {
+                        userPassword = it
+                    }
+                )
+
+                Button(
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    enabled = userEmail.isNotEmpty() && userPassword.isNotEmpty(),
+                    content = {
+                        Text(text = "Login")
+                    },
+                    onClick = {
+                        //viewModel.signInWithEmailAndPassword(userEmail.trim(), userPassword.trim())
+                    }
+                )
+
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.caption,
+                    text = "Login with"
+                )
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                val context = LocalContext.current
+                val token = stringResource(R.string.default_web_client_id)
+
+                OutlinedButton(
+                    border = ButtonDefaults.outlinedBorder.copy(width = 1.dp),
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    onClick = {
+                        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            .requestIdToken(token)
+                            .requestEmail()
+                            .build()
+
+                        val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                        launcher.launch(googleSignInClient.signInIntent)
+                    },
+                    content = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                            content = {
+                                Icon(
+                                    tint = Color.Unspecified,
+                                    painter = painterResource(id = com.firebase.ui.auth.R.drawable.googleg_standard_color_18),
+                                    contentDescription = null,
+                                )
+                                Text(
+                                    style = MaterialTheme.typography.button,
+                                    color = MaterialTheme.colors.onSurface,
+                                    text = "Google"
+                                )
+                                Icon(
+                                    tint = Color.Transparent,
+                                    imageVector = Icons.Default.MailOutline,
+                                    contentDescription = null,
+                                )
+                            }
+                        )
+                    }
+                )
+                /*
+                when(state.status) {
+                    LoadingState.Status.SUCCESS -> {
+                        Text(text = "Success")
+                    }
+                    LoadingState.Status.FAILED -> {
+                        Text(text = state.msg ?: "Error")
+                    }
+                    else -> {}
+                }
+                 */
+            }
+        )
+    }
+)
+}
+
+
+
+private fun startSignIn() {
+    val providers = arrayListOf( //todo: should move to constants - if possible
+        AuthUI.IdpConfig.EmailBuilder().build()/*,
+            AuthUI.IdpConfig.PhoneBuilder().build(),
+            AuthUI.IdpConfig.GoogleBuilder().build(),
+            AuthUI.IdpConfig.FacebookBuilder().build(),
+            AuthUI.IdpConfig.TwitterBuilder().build()*/)
+
+    val signInIntent = AuthUI.getInstance()
+        .createSignInIntentBuilder()
+        .setTheme(R.style.Theme_BakeryApp)
+        .setAvailableProviders(providers)
+        .build()
+    //launcher.launch(signInIntent)
 }

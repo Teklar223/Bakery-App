@@ -18,9 +18,6 @@ import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 
 
 class MainActivity : ComponentActivity() {
@@ -37,9 +34,6 @@ class MainActivity : ComponentActivity() {
 
         //initiating screens
         showMain()
-
-        //TODO: move this functionality to the login screen
-        //showLogin() //not signed in
 
     }
 
@@ -70,7 +64,7 @@ class MainActivity : ComponentActivity() {
         result.toString()
     }
 
-    private fun startSignIn() {
+    internal fun startSignIn() {
         val providers = arrayListOf( //todo: should move to constants - if possible
             AuthUI.IdpConfig.EmailBuilder().build()/*,
             AuthUI.IdpConfig.PhoneBuilder().build(),

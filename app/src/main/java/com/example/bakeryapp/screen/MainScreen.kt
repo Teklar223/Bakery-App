@@ -1,19 +1,16 @@
 package com.example.bakeryapp.screen
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.bakeryapp.nav.NavGraph
 import com.example.bakeryapp.nav.Screens
-import com.google.firebase.auth.FirebaseAuth
+import com.example.bakeryapp.util.AuthInfo
 
 @Composable
 fun MainScreen(
@@ -45,13 +42,25 @@ fun MainScreen(
         }
 
         /** Login OR Sign-out **/
-        Button(
-            onClick = {
-                navController.navigate(route = Screens.LoginScreen.route)
+        if (AuthInfo.user == null){
+            Button(
+                onClick = {
+                    navController.navigate(route = Screens.LoginScreen.route)
+                }
+            ){
+                Text(text = "Login")
             }
-        ){
-            Text(text = "Login")
         }
+        else{
+            Button(
+                onClick = {
+                    navController.navigate(route = Screens.MainScreen.route)
+                }
+            ){
+                Text(text = "Sign-Out")
+            }
+        }
+
     }
 
     /** ITEMS **/

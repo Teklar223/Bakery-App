@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.bakeryapp.screen.*
 import com.example.bakeryapp.util.SharedViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun NavGraph(
@@ -16,7 +17,17 @@ fun NavGraph(
         navController = navController,
         startDestination = Screens.MainScreen.route
     ){
-        /* *** MAIN SCREEN *** */
+        /** *** TEMP ITEMS SCREEN *** **/
+        composable( //TODO: remove when its done
+            route = Screens.TEMPItemsScreen.route
+        ){
+            TEMPItemsScreen(
+                navController = navController,
+                sharedViewModel = sharedViewModel
+            )
+        }
+
+        /** *** MAIN SCREEN *** **/
         composable(
             route = Screens.MainScreen.route
         ){
@@ -24,7 +35,8 @@ fun NavGraph(
                 navController = navController
             )
         }
-        /* *** GET DATA SCREEN *** */
+
+        /** *** LOGIN SCREEN *** **/
         composable(
             route = Screens.LoginScreen.route
         ){
@@ -33,11 +45,32 @@ fun NavGraph(
                 sharedViewModel = sharedViewModel
             )
         }
-        /* *** ADD DATA SCREEN *** */
+
+        /** *** CART SCREEN *** **/
         composable(
-            route = Screens.RegisterScreen.route
+            route = Screens.CartScreen.route
         ){
-            RegisterScreen(
+            CartScreen(
+                navController = navController,
+                sharedViewModel = sharedViewModel
+            )
+        }
+
+        /** *** ORDERS SCREEN *** **/
+        composable(
+            route = Screens.OrdersScreen.route
+        ){
+            OrdersScreen(
+                navController = navController,
+                sharedViewModel = sharedViewModel
+            )
+        }
+
+        /** *** ADD ITEM SCREEN *** **/
+        composable(
+            route = Screens.AddItemScreen.route
+        ){
+            AddItemScreen(
                 navController = navController,
                 sharedViewModel = sharedViewModel
             )

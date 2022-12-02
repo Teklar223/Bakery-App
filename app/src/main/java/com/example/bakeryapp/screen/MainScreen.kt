@@ -10,46 +10,85 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bakeryapp.nav.Screens
+import com.example.bakeryapp.util.AuthInfo
 
 @Composable
 fun MainScreen(
     navController: NavController
 ){
+
+    /** TOP BAR **/
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ){
+        /** Orders **/
+        OutlinedButton(
+            onClick = {
+                navController.navigate(route = Screens.OrdersScreen.route)
+            }
+        ){
+            Text(text = "My Orders")
+        }
+
+        /** Cart **/
+        OutlinedButton(
+            onClick = {
+                navController.navigate(route = Screens.CartScreen.route)
+            }
+        ){
+            Text(text = "Cart") //todo: make it an icon!
+        }
+
+        /** Login OR Sign-out **/
+        if (AuthInfo.user == null){
+            Button(
+                onClick = {
+                    navController.navigate(route = Screens.LoginScreen.route)
+                }
+            ){
+                Text(text = "Login")
+            }
+        }
+        else{
+            Button(
+                onClick = {
+                    navController.navigate(route = Screens.MainScreen.route)
+                }
+            ){
+                Text(text = "Sign-Out")
+            }
+        }
+
+    }
+
+    /** ITEMS **/
     Column (
         modifier = Modifier
-            .padding(start =50.dp, end = 50.dp)
+            .padding(start = 50.dp, end = 50.dp)
             .fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        /* GET user button */
+        /** GET ITEMS */
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
-                navController.navigate(route = Screens.LoginScreen.route)
+                navController.navigate(route = Screens.TEMPItemsScreen.route)
             }
         ){
-            Text(text = "Get User Data")
+            Text(text = "Get Item Data")
         }
 
-        /** ADD user button */
-        OutlinedButton(
+        /** ADD ITEMS */
+        Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
-                navController.navigate(route = Screens.RegisterScreen.route)
+                navController.navigate(route = Screens.AddItemScreen.route)
             }
         ){
-            Text(text = "Add User Data")
-        }
-
-        /** Logout Button */
-        OutlinedButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = {
-                navController.navigate(route = Screens.RegisterScreen.route)
-            }
-        ){
-            Text(text = "logout")
+            Text(text = "ADD Item Data")
         }
     }
 }

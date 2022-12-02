@@ -206,3 +206,27 @@ private fun startSignIn() {
         .build()
     //launcher.launch(signInIntent)
 }
+
+/*
+private val signInLauncher = registerForActivityResult(
+    FirebaseAuthUIActivityResultContract()
+) { result: FirebaseAuthUIAuthenticationResult? ->
+    result.toString()
+}
+
+internal fun startSignIn() {
+    val providers = arrayListOf(
+        AuthUI.IdpConfig.EmailBuilder().build()/*,
+        AuthUI.IdpConfig.PhoneBuilder().build(),
+        AuthUI.IdpConfig.GoogleBuilder().build(),
+        AuthUI.IdpConfig.FacebookBuilder().build(),
+        AuthUI.IdpConfig.TwitterBuilder().build()*/)
+
+    val signInIntent = AuthUI.getInstance()
+        .createSignInIntentBuilder()
+        .setTheme(R.style.Theme_BakeryApp)
+        .setAvailableProviders(providers)
+        .build()
+    signInLauncher.launch(signInIntent)
+}
+*/

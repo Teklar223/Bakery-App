@@ -53,31 +53,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-    private fun showLogin(){
-        startSignIn()
-    }
-
-    private val signInLauncher = registerForActivityResult(
-        FirebaseAuthUIActivityResultContract()
-    ) { result: FirebaseAuthUIAuthenticationResult? ->
-        //TODO: handle auth result
-        result.toString()
-    }
-
-    internal fun startSignIn() {
-        val providers = arrayListOf( //todo: should move to constants - if possible
-            AuthUI.IdpConfig.EmailBuilder().build()/*,
-            AuthUI.IdpConfig.PhoneBuilder().build(),
-            AuthUI.IdpConfig.GoogleBuilder().build(),
-            AuthUI.IdpConfig.FacebookBuilder().build(),
-            AuthUI.IdpConfig.TwitterBuilder().build()*/)
-
-        val signInIntent = AuthUI.getInstance()
-            .createSignInIntentBuilder()
-            .setTheme(R.style.Theme_BakeryApp)
-            .setAvailableProviders(providers)
-            .build()
-        signInLauncher.launch(signInIntent)
-    }
-
 }

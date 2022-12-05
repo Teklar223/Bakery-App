@@ -4,13 +4,31 @@ import android.content.Context
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.google.android.gms.tasks.Task
+import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
+
+
+suspend fun <T> Task<QuerySnapshot>.tryAwaitList(classData:Class<T>) : MutableList<T> {
+    return try {
+        withContext(Dispatchers.IO) {
+            val output = await().toObjects(classData)
+            return@withContext withContext(Dispatchers.Main) {
+                 output
+            }
+        }
+    }catch(e:Exception) {
+        println("There was an error ${e.message}")
+        mutableListOf()
+    }
+}
 
 class SharedViewModel: ViewModel() {
 
-    fun saveData(
+   /* fun saveData(
         user: UserData,
         context: Context,
         navController: NavController
@@ -27,9 +45,9 @@ class SharedViewModel: ViewModel() {
         catch (e: Exception){
             Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
         }
-    }
+    }*/
 
-    fun retrieveData(
+    /*fun retrieveData(
         userID: String,
         context: Context,
         navController: NavController,
@@ -53,6 +71,13 @@ class SharedViewModel: ViewModel() {
         catch (e: Exception){
             Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
         }
+    }*/
+
+    fun getOrders() = CoroutineScope(Dispatchers.IO).async {
+        return@async Firebase.firestore
+            .collection("orders")
+            .get()
+            .tryAwaitList(OrdersData::class.java)
     }
 
     fun deleteData(

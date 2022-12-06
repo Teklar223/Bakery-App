@@ -33,7 +33,7 @@ class SharedViewModel: ViewModel() {
 
     fun getOrders() = CoroutineScope(Dispatchers.IO).async {
         return@async Firebase.firestore
-            .collection("")//TODO
+            .collection("orders")//TODO: change to util.constants.ordersCol
             .get()
             .tryAwaitList(OrdersData::class.java)
     }

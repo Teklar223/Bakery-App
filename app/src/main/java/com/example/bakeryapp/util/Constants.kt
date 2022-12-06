@@ -8,10 +8,25 @@ import com.google.firebase.ktx.Firebase
 
 val database = Firebase.firestore
 val dbRegion = "eur3"
-val profilesCol = "profiles"
+val ordersCol = "orders"
 val itemsCol = "items"
-val rawmatCol = "rawmat"
+val materialsCol = "materials"
 
-/* Firebase Authentiation */
+/* Common loading state class for observers */
 
+data class LoadingState private constructor(val status: Status, val msg: String? = null) {
+    companion object {
+        val LOADED = LoadingState(Status.SUCCESS)
+        val IDLE = LoadingState(Status.IDLE)
+        val LOADING = LoadingState(Status.RUNNING)
+        fun error(msg: String?) = LoadingState(Status.FAILED, msg)
+    }
+
+    enum class Status {
+        RUNNING,
+        SUCCESS,
+        FAILED,
+        IDLE,
+    }
+}
 

@@ -9,12 +9,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.bakeryapp.MainActivity
 import com.example.bakeryapp.nav.Screens
 import com.example.bakeryapp.util.AuthInfo
+import com.example.bakeryapp.util.SharedViewModel
 
 @Composable
 fun MainScreen(
-    navController: NavController
+    navController: NavController,
+    sharedViewModel: SharedViewModel,
+    mainActivity: MainActivity
 ){
 
     /** TOP BAR **/
@@ -54,7 +58,8 @@ fun MainScreen(
         else{
             Button(
                 onClick = {
-                    navController.navigate(route = Screens.MainScreen.route)
+                    sharedViewModel.signOut()
+                    mainActivity.reloadActivity()
                 }
             ){
                 Text(text = "Sign-Out")

@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
 
     private fun showMain(){
         setContent {
-            BakeryTheme{
+            BakeryTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background

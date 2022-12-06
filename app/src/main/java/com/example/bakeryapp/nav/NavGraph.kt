@@ -16,7 +16,7 @@ fun NavGraph(
 ){
     NavHost(
         navController = navController,
-        startDestination = Screens.MainScreen.route
+        startDestination = Screens.OrdersScreen.route
     ){
         /** *** TEMP ITEMS SCREEN *** **/
         composable( //TODO: remove when its done
@@ -42,7 +42,7 @@ fun NavGraph(
         /** *** LOGIN SCREEN *** **/
         composable(
             route = Screens.LoginScreen.route
-        ){
+        ) {
             LoginScreen(
                 navController = navController,
                 sharedViewModel = sharedViewModel,

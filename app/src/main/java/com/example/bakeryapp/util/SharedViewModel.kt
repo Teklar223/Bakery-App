@@ -5,15 +5,35 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.google.android.gms.tasks.Task
+import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
 import com.example.bakeryapp.MainActivity
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+
+
+suspend fun <T> Task<QuerySnapshot>.tryAwaitList(classData:Class<T>) : MutableList<T> {
+    return try {
+        withContext(Dispatchers.IO) {
+            val output = await().toObjects(classData)
+            return@withContext withContext(Dispatchers.Main) {
+                 output
+            }
+        }
+    }catch(e:Exception) {
+        println("There was an error ${e.message}")
+        mutableListOf()
+    }
+}
 
 /**
  * This class is the "backend" of our application, responsible for all Firebase Auth and Cloudstore
@@ -45,6 +65,13 @@ class SharedViewModel: ViewModel() {
     fun signOut(){
         AuthInfo.auth.signOut()
         AuthInfo.user = null
+    }
+
+    fun getOrders() = CoroutineScope(Dispatchers.IO).async {
+        return@async Firebase.firestore
+            .collection("orders")//TODO: change to util.constants.ordersCol
+            .get()
+            .tryAwaitList(OrdersData::class.java)
     }
 
     /**examples for an obsolete user data class:

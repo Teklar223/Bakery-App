@@ -13,7 +13,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bakeryapp.R
-import com.example.bakeryapp.util.SharedViewModel
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
@@ -27,7 +26,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.bakeryapp.MainActivity
+import com.example.bakeryapp.nav.Screens
 import com.example.bakeryapp.util.AuthInfo
+import com.example.bakeryapp.util.LoadingState
+import com.example.bakeryapp.util.SharedViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -37,17 +42,21 @@ import com.google.firebase.auth.GoogleAuthProvider
 @Composable
 fun LoginScreen(
     navController: NavController,
-    sharedViewModel: SharedViewModel
+    sharedViewModel: SharedViewModel,
+    mainActivity: MainActivity
 ){
     var userEmail by remember { mutableStateOf("") }
     var userPassword by remember { mutableStateOf("") }
+    val state by sharedViewModel.loadingState.collectAsState()
 
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
+        navController.popBackStack()
         val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
         try {
             val account = task.getResult(ApiException::class.java)!!
             val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-            //viewModel.signWithCredential(credential)
+            sharedViewModel.signWithCredential(credential)
+            navController.popBackStack()
         } catch (e: ApiException) {
             //Log.w("TAG", "Google sign in failed", e)
         }
@@ -119,7 +128,10 @@ fun LoginScreen(
                         Text(text = "Login")
                     },
                     onClick = {
-                        //viewModel.signInWithEmailAndPassword(userEmail.trim(), userPassword.trim())
+                        sharedViewModel.signInWithEmailAndPassword(userEmail.trim(), userPassword.trim())
+                        if(sharedViewModel.loadingState.value == LoadingState.LOADED){
+                            navController.popBackStack()
+                        }
                     }
                 )
 
@@ -127,8 +139,20 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.caption,
-                    text = "Login with"
+                    text = "You can also login with the socials below"
                 )
+
+                /** login Success/Failure message */
+                when(state.status) {
+                    LoadingState.Status.SUCCESS -> {
+                        Text(text = "Success")
+                        navController.popBackStack()
+                    }
+                    LoadingState.Status.FAILED -> {
+                        Text(text = state.msg ?: "Error")
+                    }
+                    else -> {}
+                }
 
                 Spacer(modifier = Modifier.height(18.dp))
 
@@ -172,17 +196,7 @@ fun LoginScreen(
                         )
                     }
                 )
-                /*
-                when(state.status) {
-                    LoadingState.Status.SUCCESS -> {
-                        Text(text = "Success")
-                    }
-                    LoadingState.Status.FAILED -> {
-                        Text(text = state.msg ?: "Error")
-                    }
-                    else -> {}
-                }
-                 */
+
             }
         )
     }
@@ -190,9 +204,9 @@ fun LoginScreen(
 }
 
 
-
+/*
 private fun startSignIn() {
-    val providers = arrayListOf( //todo: should move to constants - if possible
+    val providers = arrayListOf(
         AuthUI.IdpConfig.EmailBuilder().build()/*,
             AuthUI.IdpConfig.PhoneBuilder().build(),
             AuthUI.IdpConfig.GoogleBuilder().build(),
@@ -206,27 +220,10 @@ private fun startSignIn() {
         .build()
     //launcher.launch(signInIntent)
 }
-
 /*
 private val signInLauncher = registerForActivityResult(
     FirebaseAuthUIActivityResultContract()
 ) { result: FirebaseAuthUIAuthenticationResult? ->
     result.toString()
-}
-
-internal fun startSignIn() {
-    val providers = arrayListOf(
-        AuthUI.IdpConfig.EmailBuilder().build()/*,
-        AuthUI.IdpConfig.PhoneBuilder().build(),
-        AuthUI.IdpConfig.GoogleBuilder().build(),
-        AuthUI.IdpConfig.FacebookBuilder().build(),
-        AuthUI.IdpConfig.TwitterBuilder().build()*/)
-
-    val signInIntent = AuthUI.getInstance()
-        .createSignInIntentBuilder()
-        .setTheme(R.style.Theme_BakeryApp)
-        .setAvailableProviders(providers)
-        .build()
-    signInLauncher.launch(signInIntent)
 }
 */

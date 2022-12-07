@@ -16,7 +16,7 @@ fun NavGraph(
 ){
     NavHost(
         navController = navController,
-        startDestination = Screens.OrdersScreen.route
+        startDestination = Screens.MainScreen.route
     ){
         /** *** TEMP ITEMS SCREEN *** **/
         composable( //TODO: remove when its done

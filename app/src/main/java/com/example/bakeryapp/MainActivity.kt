@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
 
         //initiating auth
         AuthInfo.auth = FirebaseAuth.getInstance()
-        AuthInfo.auth.addAuthStateListener()
+        //AuthInfo.auth.addAuthStateListener()
         AuthInfo.user = AuthInfo.auth.currentUser
 
         //initiating screens

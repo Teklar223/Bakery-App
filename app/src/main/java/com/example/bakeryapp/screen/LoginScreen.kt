@@ -6,16 +6,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bakeryapp.R
-import com.firebase.ui.auth.AuthUI
-import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
-import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.rounded.ArrowBack
@@ -26,10 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.bakeryapp.MainActivity
-import com.example.bakeryapp.nav.Screens
 import com.example.bakeryapp.util.AuthInfo
 import com.example.bakeryapp.util.LoadingState
 import com.example.bakeryapp.util.SharedViewModel
@@ -37,6 +30,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -48,6 +42,7 @@ fun LoginScreen(
     var userEmail by remember { mutableStateOf("") }
     var userPassword by remember { mutableStateOf("") }
     val state by sharedViewModel.loadingState.collectAsState()
+    val scope = rememberCoroutineScope()
 
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
         navController.popBackStack()
@@ -122,15 +117,16 @@ fun LoginScreen(
                 )
 
                 Button(
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
                     enabled = userEmail.isNotEmpty() && userPassword.isNotEmpty(),
                     content = {
                         Text(text = "Login")
                     },
                     onClick = {
-                        sharedViewModel.signInWithEmailAndPassword(userEmail.trim(), userPassword.trim())
-                        if(sharedViewModel.loadingState.value == LoadingState.LOADED){
-                            navController.popBackStack()
+                        scope.launch {
+                            sharedViewModel.signInWithEmailAndPassword(userEmail.trim(), userPassword.trim())
                         }
                     }
                 )
@@ -161,7 +157,9 @@ fun LoginScreen(
 
                 OutlinedButton(
                     border = ButtonDefaults.outlinedBorder.copy(width = 1.dp),
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
                     onClick = {
                         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                             .requestIdToken(token)
@@ -202,28 +200,3 @@ fun LoginScreen(
     }
 )
 }
-
-
-/*
-private fun startSignIn() {
-    val providers = arrayListOf(
-        AuthUI.IdpConfig.EmailBuilder().build()/*,
-            AuthUI.IdpConfig.PhoneBuilder().build(),
-            AuthUI.IdpConfig.GoogleBuilder().build(),
-            AuthUI.IdpConfig.FacebookBuilder().build(),
-            AuthUI.IdpConfig.TwitterBuilder().build()*/)
-
-    val signInIntent = AuthUI.getInstance()
-        .createSignInIntentBuilder()
-        .setTheme(R.style.Theme_BakeryApp)
-        .setAvailableProviders(providers)
-        .build()
-    //launcher.launch(signInIntent)
-}
-/*
-private val signInLauncher = registerForActivityResult(
-    FirebaseAuthUIActivityResultContract()
-) { result: FirebaseAuthUIAuthenticationResult? ->
-    result.toString()
-}
-*/

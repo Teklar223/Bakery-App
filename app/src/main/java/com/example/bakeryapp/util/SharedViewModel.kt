@@ -88,6 +88,13 @@ class SharedViewModel: ViewModel() {
             .tryAwaitList(OrdersData::class.java)
     }
 
+    fun getItems() = CoroutineScope(Dispatchers.IO).async {
+        return@async Firebase.firestore
+            .collection("items")//TODO: change to util.constants.itemsCol
+            .get()
+            .tryAwaitList(ItemData::class.java)
+    }
+
     /**examples for an obsolete user data class:
     TODO: remove after everything is implemented
     fun saveData(

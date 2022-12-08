@@ -90,6 +90,15 @@ fun MainScreen(
         ){
             Text(text = "Reload this screen")
         }
+
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = {
+                navController.navigate(route = Screens.MaterialsScreen.route)
+            }
+        ){
+            Text(text = "Get materials Data")
+        }
     }
 
 

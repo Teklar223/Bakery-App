@@ -14,9 +14,6 @@ import com.example.bakeryapp.nav.NavGraph
 import com.example.bakeryapp.ui.theme.BakeryTheme
 import com.example.bakeryapp.util.AuthInfo
 import com.example.bakeryapp.util.SharedViewModel
-import com.firebase.ui.auth.AuthUI
-import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
-import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 
 
@@ -47,6 +44,8 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ){
                     navController = rememberNavController()
+                    sharedViewModel.setNav(navController)
+                    sharedViewModel.setActivity(this)
                     NavGraph(
                         navController = navController,
                         sharedViewModel = sharedViewModel,

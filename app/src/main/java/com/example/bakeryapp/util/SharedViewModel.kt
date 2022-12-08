@@ -1,7 +1,5 @@
 package com.example.bakeryapp.util
 
-import android.content.Context
-import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -13,12 +11,11 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 import com.example.bakeryapp.MainActivity
 import com.google.firebase.auth.AuthCredential
-import com.google.firebase.auth.ktx.auth
+import com.google.firebase.auth.AuthResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 
 suspend fun <T> Task<QuerySnapshot>.tryAwaitList(classData:Class<T>) : MutableList<T> {
@@ -40,12 +37,29 @@ suspend fun <T> Task<QuerySnapshot>.tryAwaitList(classData:Class<T>) : MutableLi
  * DB actions.
  */
 class SharedViewModel: ViewModel() {
+    private lateinit var mainActivity: MainActivity
+    private lateinit var navController: NavController
     val loadingState = MutableStateFlow(LoadingState.IDLE)
+
+    fun setNav(navController: NavController){
+        this.navController = navController
+    }
+
+    fun setActivity(mainActivity: MainActivity){
+        this.mainActivity = mainActivity
+    }
 
     fun signInWithEmailAndPassword(email: String, password: String) = viewModelScope.launch {
         try {
             loadingState.emit(LoadingState.LOADING)
-            AuthInfo.auth.signInWithEmailAndPassword(email, password).await()
+            AuthInfo.auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task: Task<AuthResult> ->
+                    if (task.isSuccessful) {
+                        mainActivity.reloadActivity()
+                    } else {
+
+                    }
+                }
             loadingState.emit(LoadingState.LOADED)
         } catch (e: Exception) {
             loadingState.emit(LoadingState.error(e.localizedMessage))
@@ -72,6 +86,13 @@ class SharedViewModel: ViewModel() {
             .collection("orders")//TODO: change to util.constants.ordersCol
             .get()
             .tryAwaitList(OrdersData::class.java)
+    }
+
+    fun getItems() = CoroutineScope(Dispatchers.IO).async {
+        return@async Firebase.firestore
+            .collection("items")//TODO: change to util.constants.itemsCol
+            .get()
+            .tryAwaitList(ItemData::class.java)
     }
 
     /**examples for an obsolete user data class:

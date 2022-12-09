@@ -33,7 +33,7 @@ fun OrdersScreen(
     }
 
     LaunchedEffect(key1 = orders) {
-       val ordersData = sharedViewModel.getOrders().await()
+       val ordersData = sharedViewModel.getOrders()
         orders.value = ordersData
     }
 

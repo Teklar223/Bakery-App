@@ -10,6 +10,9 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 import com.example.bakeryapp.MainActivity
+import com.example.bakeryapp.util.itemsCol
+import com.example.bakeryapp.util.materialsCol
+import com.example.bakeryapp.util.ordersCol
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.AuthResult
 import kotlinx.coroutines.CoroutineScope
@@ -81,71 +84,24 @@ class SharedViewModel: ViewModel() {
         AuthInfo.user = null
     }
 
-    fun getOrders() = CoroutineScope(Dispatchers.IO).async {
+    suspend fun getOrders() = CoroutineScope(Dispatchers.IO).async {
         return@async Firebase.firestore
-            .collection("orders")//TODO: change to util.constants.ordersCol
+            .collection(ordersCol)
             .get()
             .tryAwaitList(OrdersData::class.java)
-    }
+    }.await()
 
-    fun getItems() = CoroutineScope(Dispatchers.IO).async {
+    suspend fun getItems() = CoroutineScope(Dispatchers.IO).async {
         return@async Firebase.firestore
-            .collection("items")//TODO: change to util.constants.itemsCol
+            .collection(itemsCol)
             .get()
             .tryAwaitList(ItemData::class.java)
-    }
+    }.await()
 
-    fun getMaterials() = CoroutineScope(Dispatchers.IO).async {
+    suspend fun getMaterials() = CoroutineScope(Dispatchers.IO).async {
         return@async Firebase.firestore
-            .collection("materials")//TODO: change to util.constants.itemsCol
+            .collection(materialsCol)
             .get()
             .tryAwaitList(MaterialsData::class.java)
-    }
-
-    /**examples for an obsolete user data class:
-    TODO: remove after everything is implemented
-    fun saveData(
-        context: Context,
-        navController: NavController
-    ) = CoroutineScope(Dispatchers.IO).launch {
-        try {
-            database.collection(profilesCol)
-                .add(user)
-                .addOnSuccessListener {
-                    Toast.makeText(context, "successfully saved data", Toast.LENGTH_SHORT).show()
-                    navController.popBackStack()
-                }
-        }
-        catch (e: Exception){
-            Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    fun retrieveData(
-        userID: String,
-        context: Context,
-        navController: NavController,
-        //data: (UserData) -> Unit
-    ) = CoroutineScope(Dispatchers.IO).launch {
-        try {
-            /*
-            database.collection(profilesCol)
-                .whereEqualTo("userID",userID)
-                .get()
-                .addOnSuccessListener {
-                    Toast.makeText(context, "Logging you in!", Toast.LENGTH_SHORT).show()
-                    navController.popBackStack()
-                }
-                .addOnFailureListener {
-                    Toast.makeText(
-                        context,
-                        "Could not retrieve your information, make sure it's accurate!",
-                        Toast.LENGTH_SHORT).show()
-                }
-                */
-        }
-        catch (e: Exception){
-            Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
-        }
-    }*/
+    }.await()
 }

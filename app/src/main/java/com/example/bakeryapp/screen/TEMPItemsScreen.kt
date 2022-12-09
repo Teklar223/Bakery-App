@@ -33,7 +33,7 @@ fun TEMPItemsScreen(
     }
 
     LaunchedEffect(key1 = items) {
-        val itemsData = sharedViewModel.getItems().await()
+        val itemsData = sharedViewModel.getItems()
         items.value = itemsData
     }
 

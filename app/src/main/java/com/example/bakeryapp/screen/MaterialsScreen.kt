@@ -11,12 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.bakeryapp.nav.Screens
 import com.example.bakeryapp.util.ItemData
 import com.example.bakeryapp.util.MaterialsData
-import com.example.bakeryapp.util.OrdersData
 import com.example.bakeryapp.util.SharedViewModel
-import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun MaterialsScreen(
@@ -30,13 +27,13 @@ fun MaterialsScreen(
      */
 
     val context = LocalContext.current
-    val items: MutableState<List<MaterialsData>> = remember {
+    val materials: MutableState<List<MaterialsData>> = remember {
         mutableStateOf(listOf())
     }
 
-    LaunchedEffect(key1 = items) {
-        val materialsData = sharedViewModel.getMaterials().await()
-        items.value = materialsData
+    LaunchedEffect(key1 = materials) {
+        val materialsData = sharedViewModel.getMaterials()
+        materials.value = materialsData
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -57,14 +54,14 @@ fun MaterialsScreen(
         }
 
         /* @TODO Fetch items for each order list + Styling */
-        for(item in items.value) {
-            //Text(text = "Item ID: ${item.itemId}")
+        for(material in materials.value) {
+            Text(text = "Material name: ${material.materialId}")
             Row {
                 Column {
-                    Text(text = "Item Cost:${item.cost}")
-                    Text(text = "Item Currency: ${item.currency}")
-                    Text(text = "Item Description: ${item.description}")
-                    Text(text = "Item Name: ${item.name}")
+                    Text(text = "Material Name: ${material.name}")
+                    Text(text = "Material Cost:${material.cost}")
+                    Text(text = "Material Currency: ${material.currency}")
+                    Text(text = "Material Description: ${material.description}")
                 }
             }
         }

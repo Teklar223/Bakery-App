@@ -6,11 +6,11 @@ import com.google.firebase.ktx.Firebase
 
 /* Firebase collection */
 
-val database = Firebase.firestore
-val dbRegion = "eur3"
-val ordersCol = "orders"
-val itemsCol = "items"
-val materialsCol = "materials"
+//val database = Firebase.firestore
+//val dbRegion = "eur3"
+const val ordersCol = "orders"
+const val itemsCol = "items"
+const val materialsCol = "materials"
 
 /* Common loading state class for observers */
 

@@ -14,12 +14,10 @@ import com.example.bakeryapp.nav.NavGraph
 import com.example.bakeryapp.ui.theme.BakeryTheme
 import com.example.bakeryapp.util.AuthInfo
 import com.example.bakeryapp.util.SharedViewModel
-import com.firebase.ui.auth.AuthUI
-import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
-import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 
 
+/** This a 'lazy' loader for our app UI which also initializes the necessary components of each class */
 class MainActivity : ComponentActivity() {
 
     private val sharedViewModel: SharedViewModel by viewModels()
@@ -30,6 +28,7 @@ class MainActivity : ComponentActivity() {
 
         //initiating auth
         AuthInfo.auth = FirebaseAuth.getInstance()
+        //AuthInfo.auth.addAuthStateListener()
         AuthInfo.user = AuthInfo.auth.currentUser
 
         //initiating screens
@@ -37,20 +36,31 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    private fun showMain(){
+    private fun showMain() {
         setContent {
             BakeryTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
-                ){
+                ) {
                     navController = rememberNavController()
+                    sharedViewModel.setNav(navController)
+                    //sharedViewModel.setActivity(this) // Bad practice
                     NavGraph(
                         navController = navController,
-                        sharedViewModel = sharedViewModel
+                        sharedViewModel = sharedViewModel,
+                        mainActivity = this
                     )
                 }
             }
         }
+    }
+
+    /** this acts as our way to 'refresh' the screens (for example - on sign-out)*/
+    fun reloadActivity() {
+        finish()
+        //overridePendingTransition(0, 0);
+        startActivity(intent)
+        //overridePendingTransition(0, 0);
     }
 }

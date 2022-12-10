@@ -5,10 +5,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bakeryapp.MainActivity
@@ -22,7 +21,6 @@ fun MainScreen(
     sharedViewModel: SharedViewModel,
     mainActivity: MainActivity,
 ) {
-
     /** TOP BAR **/
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -52,24 +50,11 @@ fun MainScreen(
         }
 
         /** Login OR Sign-out **/
-        if (AuthInfo.user == null) {
-            Button(
-                onClick = {
-                    navController.navigate(route = Screens.LoginScreen.route)
-                }
-            ) {
-                Text(text = "Login")
-            }
-        } else {
-            Button(
-                onClick = {
-                    sharedViewModel.signOut()
-                    mainActivity.reloadActivity()
-                }
-            ) {
-                Text(text = "Sign-Out")
-            }
-        }
+        AuthButton(
+            navController = navController,
+            sharedViewModel = sharedViewModel,
+            mainActivity = mainActivity
+        )
 
     }
 
@@ -81,6 +66,18 @@ fun MainScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        /** Test Carts & Orders */
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = {
+                navController.navigate(route = Screens.TestCartOrdersScreen.route)
+            }
+        ) {
+            Text(text = "Test Carts And Orders Screen")
+        }
+
+
         /** GET ITEMS */
         Button(
             modifier = Modifier.fillMaxWidth(),
@@ -99,6 +96,44 @@ fun MainScreen(
             }
         ) {
             Text(text = "ADD Item Data")
+        }
+
+        /** TODO: REMOVE */
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = {
+                mainActivity.reloadActivity()
+            }
+        ) {
+            Text(text = "Reload this screen")
+        }
+    }
+
+
+}
+
+@Composable
+private fun AuthButton(
+    navController: NavController,
+    sharedViewModel: SharedViewModel,
+    mainActivity: MainActivity,
+) {
+    if (AuthInfo.user == null) {
+        Button(
+            onClick = {
+                navController.navigate(route = Screens.LoginScreen.route)
+            }
+        ) {
+            Text(text = "Login")
+        }
+    } else {
+        Button(
+            onClick = {
+                sharedViewModel.signOut()
+                mainActivity.reloadActivity()
+            }
+        ) {
+            Text(text = "Sign-Out")
         }
     }
 }

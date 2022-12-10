@@ -4,18 +4,19 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.bakeryapp.MainActivity
 import com.example.bakeryapp.screen.*
 import com.example.bakeryapp.util.SharedViewModel
-import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    sharedViewModel: SharedViewModel
+    sharedViewModel: SharedViewModel,
+    mainActivity: MainActivity
 ){
     NavHost(
         navController = navController,
-        startDestination = Screens.OrdersScreen.route
+        startDestination = Screens.MainScreen.route
     ){
         /** *** TEMP ITEMS SCREEN *** **/
         composable( //TODO: remove when its done
@@ -27,12 +28,24 @@ fun NavGraph(
             )
         }
 
+        /** Admin Create Order Screen  **/
+        /** *** TEMP ITEMS SCREEN *** **/
+        composable( //TODO: remove when its done
+            route = Screens.TestCartOrdersScreen.route
+        ){
+            TestCartOrdersScreen(
+                navController = navController,
+                sharedViewModel = sharedViewModel
+            )
+        }
         /** *** MAIN SCREEN *** **/
         composable(
             route = Screens.MainScreen.route
         ){
             MainScreen(
-                navController = navController
+                navController = navController,
+                sharedViewModel = sharedViewModel,
+                mainActivity = mainActivity
             )
         }
 
@@ -42,7 +55,8 @@ fun NavGraph(
         ) {
             LoginScreen(
                 navController = navController,
-                sharedViewModel = sharedViewModel
+                sharedViewModel = sharedViewModel,
+                mainActivity = mainActivity
             )
         }
 

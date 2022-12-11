@@ -89,5 +89,15 @@ fun NavGraph(
                 sharedViewModel = sharedViewModel
             )
         }
+
+        /** *** GET MATERIALS SCREEN *** **/
+        composable(
+            route = Screens.MaterialsScreen.route
+        ){
+            MaterialsScreen(
+                navController = navController,
+                sharedViewModel = sharedViewModel
+            )
+        }
     }
 }

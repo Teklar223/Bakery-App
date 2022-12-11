@@ -37,6 +37,7 @@ fun OrdersScreen(
     }
     /* runs only if 'orders' change'*/
     LaunchedEffect(key1 = orders) {
+        // TODO: merge OrdersRepository with sharedViewModel!
         val ordersData = OrdersRepository.getOrders()
         orders.value = ordersData
     }

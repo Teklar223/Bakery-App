@@ -44,19 +44,19 @@ fun LoginScreen(
     var userPassword by remember { mutableStateOf("") }
     val state by sharedViewModel.loadingState.collectAsState()
     val scope = rememberCoroutineScope()
-    val launcher =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
+
+    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
+        navController.popBackStack()
+        val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
+        try {
+            val account = task.getResult(ApiException::class.java)!!
+            val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
+            sharedViewModel.signWithCredential(credential)
             navController.popBackStack()
-            val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
-            try {
-                val account = task.getResult(ApiException::class.java)!!
-                val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-                sharedViewModel.signWithCredential(credential)
-                navController.popBackStack()
-            } catch (e: ApiException) {
-                //Log.w("TAG", "Google sign in failed", e)
-            }
+        } catch (e: ApiException) {
+            //Log.w("TAG", "Google sign in failed", e)
         }
+    }
 
     Scaffold(
         topBar = {
@@ -127,14 +127,14 @@ fun LoginScreen(
                         },
                         onClick = {
                             scope.launch {
-                                sharedViewModel.signInWithEmailAndPassword(userEmail.trim(),
-                                    userPassword.trim(),
-                                    { /* positive result */
-                                        mainActivity.reloadActivity()
-                                    }) { /* negative result */
-                                    Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG)
-                                        .show()
-                                }
+                                sharedViewModel.signInWithEmailAndPassword(
+                                    email = userEmail.trim(),
+                                    password = userPassword.trim(),
+                                    { mainActivity.reloadActivity() }, /* positive result */
+                                    { Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG)
+                                        .show() /* negative result */
+                                    }
+                                )
                             }
                         }
                     )
@@ -163,49 +163,48 @@ fun LoginScreen(
                     val context = LocalContext.current
                     val token = stringResource(R.string.default_web_client_id)
 
-                    OutlinedButton(
-                        border = ButtonDefaults.outlinedBorder.copy(width = 1.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        onClick = {
-                            val gso =
-                                GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                    .requestIdToken(token)
-                                    .requestEmail()
-                                    .build()
+                OutlinedButton(
+                    border = ButtonDefaults.outlinedBorder.copy(width = 1.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    onClick = {
+                        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            .requestIdToken(token)
+                            .requestEmail()
+                            .build()
 
-                            val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                            launcher.launch(googleSignInClient.signInIntent)
-                        },
-                        content = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically,
-                                content = {
-                                    Icon(
-                                        tint = Color.Unspecified,
-                                        painter = painterResource(id = com.firebase.ui.auth.R.drawable.googleg_standard_color_18),
-                                        contentDescription = null,
-                                    )
-                                    Text(
-                                        style = MaterialTheme.typography.button,
-                                        color = MaterialTheme.colors.onSurface,
-                                        text = "Google"
-                                    )
-                                    Icon(
-                                        tint = Color.Transparent,
-                                        imageVector = Icons.Default.MailOutline,
-                                        contentDescription = null,
-                                    )
-                                }
-                            )
-                        }
-                    )
+                        val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                        launcher.launch(googleSignInClient.signInIntent)
+                    },
+                    content = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                            content = {
+                                Icon(
+                                    tint = Color.Unspecified,
+                                    painter = painterResource(id = com.firebase.ui.auth.R.drawable.googleg_standard_color_18),
+                                    contentDescription = null,
+                                )
+                                Text(
+                                    style = MaterialTheme.typography.button,
+                                    color = MaterialTheme.colors.onSurface,
+                                    text = "Google"
+                                )
+                                Icon(
+                                    tint = Color.Transparent,
+                                    imageVector = Icons.Default.MailOutline,
+                                    contentDescription = null,
+                                )
+                            }
+                        )
+                    }
+                )
 
-                }
-            )
-        }
-    )
+            }
+        )
+    }
+)
 }

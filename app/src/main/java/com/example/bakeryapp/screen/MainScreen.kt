@@ -19,8 +19,8 @@ import com.example.bakeryapp.util.SharedViewModel
 fun MainScreen(
     navController: NavController,
     sharedViewModel: SharedViewModel,
-    mainActivity: MainActivity,
-) {
+    mainActivity: MainActivity
+){
     /** TOP BAR **/
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -104,8 +104,17 @@ fun MainScreen(
             onClick = {
                 mainActivity.reloadActivity()
             }
-        ) {
+        ){
             Text(text = "Reload this screen")
+        }
+
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = {
+                navController.navigate(route = Screens.MaterialsScreen.route)
+            }
+        ){
+            Text(text = "Get materials Data")
         }
     }
 
@@ -116,23 +125,24 @@ fun MainScreen(
 private fun AuthButton(
     navController: NavController,
     sharedViewModel: SharedViewModel,
-    mainActivity: MainActivity,
-) {
-    if (AuthInfo.user == null) {
+    mainActivity: MainActivity
+){
+    if (AuthInfo.user == null){
         Button(
             onClick = {
                 navController.navigate(route = Screens.LoginScreen.route)
             }
-        ) {
+        ){
             Text(text = "Login")
         }
-    } else {
+    }
+    else{
         Button(
             onClick = {
                 sharedViewModel.signOut()
                 mainActivity.reloadActivity()
             }
-        ) {
+        ){
             Text(text = "Sign-Out")
         }
     }

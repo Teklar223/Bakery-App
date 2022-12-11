@@ -17,7 +17,6 @@ import com.example.bakeryapp.util.SharedViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 
-/** This a 'lazy' loader for our app UI which also initializes the necessary components of each class */
 class MainActivity : ComponentActivity() {
 
     private val sharedViewModel: SharedViewModel by viewModels()
@@ -58,9 +57,9 @@ class MainActivity : ComponentActivity() {
 
     /** this acts as our way to 'refresh' the screens (for example - on sign-out)*/
     fun reloadActivity() {
-        finish()
+        finish();
         //overridePendingTransition(0, 0);
-        startActivity(intent)
+        startActivity(intent);
         //overridePendingTransition(0, 0);
     }
 }

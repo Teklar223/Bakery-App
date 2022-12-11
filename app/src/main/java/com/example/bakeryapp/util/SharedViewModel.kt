@@ -10,14 +10,18 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 import com.example.bakeryapp.MainActivity
+import com.example.bakeryapp.util.itemsCol
+import com.example.bakeryapp.util.materialsCol
+import com.example.bakeryapp.util.ordersCol
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.AuthResult
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.ktx.toObjects
-import com.google.firestore.v1.StructuredQuery.Order
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.ktx.toObjects
+import com.google.firestore.v1.StructuredQuery.Order
 import kotlinx.coroutines.launch
 
 
@@ -32,7 +36,6 @@ suspend fun <T> Task<QuerySnapshot>.tryAwaitList(classData: Class<T>): MutableLi
         mutableListOf()
     }
 }
-
 suspend fun <T> Task<DocumentSnapshot>.tryAwait(classData: Class<T>): T? {
     return try {
         // resource fetch at io
@@ -46,7 +49,6 @@ suspend fun <T> Task<DocumentSnapshot>.tryAwait(classData: Class<T>): T? {
         return null
     }
 }
-
 suspend fun <T> itemById(
     collectionName: String,
     id: String,
@@ -59,45 +61,22 @@ suspend fun <T> itemById(
         .tryAwait(fromClass)
 }
 
-
 /**
  * This class is the "backend" of our application, responsible for all Firebase Auth and Cloudstore
  * DB actions.
  */
-class SharedViewModel : ViewModel() {
-    // private lateinit var mainActivity: MainActivity /*  VERY DANGEROUS - memory leaks */
+class SharedViewModel: ViewModel() {
+    private lateinit var mainActivity: MainActivity // TODO: remove!
     private lateinit var navController: NavController
     val loadingState = MutableStateFlow(LoadingState.IDLE)
 
-    fun setNav(navController: NavController) {
+    fun setNav(navController: NavController){
         this.navController = navController
     }
-
-
-    // function to populate orders
-    fun populateOrders() = viewModelScope.launch {
-        AuthInfo.user?.let { user ->
-            val items = getItems()
-            for (i in 0 until 10) {
-                val list: MutableList<OrderItem> = mutableListOf()
-                for (j in 0 until 3) {
-                    list.add(OrderItem(itemId = items.random().itemId,
-                        ((Math.random() * 3) + 1).toInt()))
-                }
-                val order = OrdersData(
-                    user.uid,
-                    list
-                )
-                OrdersRepository.insertOrder(order)
-            }
-        }
-    }
-
-
     fun signInWithEmailAndPassword(
         email: String,
         password: String,
-        reloadActivity: () -> Unit,
+        posCallback: () -> Unit,
         error: (e: java.lang.Exception) -> Unit,
     ) = viewModelScope.launch {
         try {
@@ -106,9 +85,9 @@ class SharedViewModel : ViewModel() {
             AuthInfo.auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task: Task<AuthResult> ->
                     if (task.isSuccessful) {
-                        reloadActivity() // call positive callback
+                        posCallback()
                     } else if (task.exception != null) {
-                        error(task.exception!!) // call negative callback with exception
+                        error(task.exception!!) // negative callback with exception
                     }
                 }
 
@@ -118,20 +97,27 @@ class SharedViewModel : ViewModel() {
         }
     }
 
-    fun signWithCredential(credential: AuthCredential) = viewModelScope.launch {
-        try {
-            loadingState.emit(LoadingState.LOADING)
-            AuthInfo.auth.signInWithCredential(credential).await()
-            loadingState.emit(LoadingState.LOADED)
-        } catch (e: Exception) {
-            loadingState.emit(LoadingState.error(e.localizedMessage))
+        fun signWithCredential(credential: AuthCredential) = viewModelScope.launch {
+            try {
+                loadingState.emit(LoadingState.LOADING)
+                AuthInfo.auth.signInWithCredential(credential).await()
+                loadingState.emit(LoadingState.LOADED)
+            } catch (e: Exception) {
+                loadingState.emit(LoadingState.error(e.localizedMessage))
+            }
         }
-    }
 
-    fun signOut() {
-        AuthInfo.auth.signOut()
-        AuthInfo.user = null
-    }
+        fun signOut() {
+            AuthInfo.auth.signOut()
+            AuthInfo.user = null
+        }
+
+    suspend fun getOrders() = CoroutineScope(Dispatchers.IO).async {
+        return@async Firebase.firestore
+            .collection(ordersCol)
+            .get()
+            .tryAwaitList(OrdersData::class.java)
+    }.await()
 
     suspend fun getItems() = CoroutineScope(Dispatchers.IO).async {
         return@async Firebase.firestore
@@ -146,51 +132,3 @@ class SharedViewModel : ViewModel() {
             .get()
             .tryAwaitList(MaterialsData::class.java)
     }.await()
-
-    /**examples for an obsolete user data class:
-    TODO: remove after everything is implemented
-    fun saveData(
-    context: Context,
-    navController: NavController
-    ) = CoroutineScope(Dispatchers.IO).launch {
-    try {
-    database.collection(profilesCol)
-    .add(user)
-    .addOnSuccessListener {
-    Toast.makeText(context, "successfully saved data", Toast.LENGTH_SHORT).show()
-    navController.popBackStack()
-    }
-    }
-    catch (e: Exception){
-    Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
-    }
-    }
-
-    fun retrieveData(
-    userID: String,
-    context: Context,
-    navController: NavController,
-    //data: (UserData) -> Unit
-    ) = CoroutineScope(Dispatchers.IO).launch {
-    try {
-    /*
-    database.collection(profilesCol)
-    .whereEqualTo("userID",userID)
-    .get()
-    .addOnSuccessListener {
-    Toast.makeText(context, "Logging you in!", Toast.LENGTH_SHORT).show()
-    navController.popBackStack()
-    }
-    .addOnFailureListener {
-    Toast.makeText(
-    context,
-    "Could not retrieve your information, make sure it's accurate!",
-    Toast.LENGTH_SHORT).show()
-    }
-    */
-    }
-    catch (e: Exception){
-    Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
-    }
-    }*/
-}

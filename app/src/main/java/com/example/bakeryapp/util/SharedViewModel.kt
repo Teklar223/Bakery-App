@@ -96,7 +96,7 @@ class SharedViewModel : ViewModel() {
                         it.list.map { orderItem -> /* insert item contents  */
                             OrderItemPopulated(
                                 item = itemById(
-                                    ordersCol,
+                                    itemsCol,
                                     orderItem.itemId,
                                     ItemData::class.java
                                 ),

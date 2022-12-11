@@ -1,5 +1,6 @@
 package com.example.bakeryapp.util
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -19,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import java.util.Objects
 
 
 suspend fun <T> Task<QuerySnapshot>.tryAwaitList(classData:Class<T>) : MutableList<T> {
@@ -104,4 +106,13 @@ class SharedViewModel: ViewModel() {
             .get()
             .tryAwaitList(MaterialsData::class.java)
     }.await()
+
+
+    suspend fun addMaterials() = CoroutineScope(Dispatchers.IO).async {
+
+        Log.d("addMaterials", "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+        //val amit = MaterialsData("asa","asas","sda",1111,"sasa")
+        //Firebase.firestore.collection(materialsCol).document("lalala")
+    }.await()
+
 }

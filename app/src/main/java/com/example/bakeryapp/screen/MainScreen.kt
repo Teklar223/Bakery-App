@@ -81,15 +81,6 @@ fun MainScreen(
             Text(text = "ADD Item Data")
         }
 
-        /** TODO: REMOVE */
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = {
-                mainActivity.reloadActivity()
-            }
-        ){
-            Text(text = "Reload this screen")
-        }
 
         Button(
             modifier = Modifier.fillMaxWidth(),
@@ -98,6 +89,17 @@ fun MainScreen(
             }
         ){
             Text(text = "Get materials Data")
+        }
+
+        /** TODO: REMOVE */
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = {
+                //mainActivity.reloadActivity()
+                navController.navigate(route = Screens.AddMaterialScreen.route)
+            }
+        ){
+            Text(text = "Add materials Data")
         }
     }
 

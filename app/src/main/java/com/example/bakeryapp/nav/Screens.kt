@@ -8,6 +8,7 @@ sealed class Screens(val route: String){
     object AddItemScreen: Screens(route = "add_item_screen")
     object TEMPItemsScreen: Screens(route = "temp_items_screen")
     object MaterialsScreen: Screens(route = "materials_screen")
+    object AddMaterialScreen: Screens(route = "add_material_screen")
     //TODO: remove 'TEMPItemsScreen' after it's dev' is done
 
     /**

@@ -38,7 +38,7 @@ import kotlinx.coroutines.launch
 fun LoginScreen(
     navController: NavController,
     sharedViewModel: SharedViewModel,
-    mainActivity: MainActivity,
+    mainActivity: MainActivity
 ) {
     var userEmail by remember { mutableStateOf("") }
     var userPassword by remember { mutableStateOf("") }

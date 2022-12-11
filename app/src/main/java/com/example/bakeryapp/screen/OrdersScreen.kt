@@ -11,19 +11,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 import androidx.navigation.NavController
 import com.example.bakeryapp.util.*
-import com.google.android.gms.auth.api.Auth
-import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
@@ -38,7 +32,7 @@ fun OrdersScreen(
     /* runs only if 'orders' change'*/
     LaunchedEffect(key1 = orders) {
         // TODO: merge OrdersRepository with sharedViewModel!
-        val ordersData = OrdersRepository.getOrders()
+        val ordersData = sharedViewModel.getOrders()
         orders.value = ordersData
     }
 

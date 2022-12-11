@@ -134,7 +134,7 @@ fun PopulateOrdersButton(
     Button(onClick = {
         state += 1
         if (state == 2) {
-            OrdersRepository.populateOrders() // TODO: merge svm with
+            sharedViewModel.populateOrders()
             Toast.makeText(context, "Populated orders successfully", Toast.LENGTH_SHORT).show()
             state = 0
         } else {

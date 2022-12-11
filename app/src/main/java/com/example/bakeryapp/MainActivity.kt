@@ -16,7 +16,7 @@ import com.example.bakeryapp.util.AuthInfo
 import com.example.bakeryapp.util.SharedViewModel
 import com.google.firebase.auth.FirebaseAuth
 
-
+/** An initiator class, in charge of starting the activity and init other needed objects */
 class MainActivity : ComponentActivity() {
 
     private val sharedViewModel: SharedViewModel by viewModels()
@@ -27,7 +27,6 @@ class MainActivity : ComponentActivity() {
 
         //initiating auth
         AuthInfo.auth = FirebaseAuth.getInstance()
-        //AuthInfo.auth.addAuthStateListener()
         AuthInfo.user = AuthInfo.auth.currentUser
 
         //initiating screens
@@ -44,7 +43,6 @@ class MainActivity : ComponentActivity() {
                 ) {
                     navController = rememberNavController()
                     sharedViewModel.setNav(navController)
-                    //sharedViewModel.setActivity(this) // Bad practice
                     NavGraph(
                         navController = navController,
                         sharedViewModel = sharedViewModel,

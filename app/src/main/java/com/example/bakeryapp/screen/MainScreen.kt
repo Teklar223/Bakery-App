@@ -1,5 +1,6 @@
 package com.example.bakeryapp.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.OutlinedButton
@@ -25,13 +26,17 @@ fun MainScreen(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.SpaceEvenly
-    ){
+    ) {
         /** Orders **/
         OutlinedButton(
             onClick = {
-                navController.navigate(route = Screens.OrdersScreen.route)
+                if (AuthInfo.user != null) // only logged in users are allowed
+                    navController.navigate(route = Screens.OrdersScreen.route)
+                else Toast.makeText(mainActivity,
+                    "Only logged in users are allowed to view this screen",
+                    Toast.LENGTH_LONG).show()
             }
-        ){
+        ) {
             Text(text = "My Orders")
         }
 
@@ -40,7 +45,7 @@ fun MainScreen(
             onClick = {
                 navController.navigate(route = Screens.CartScreen.route)
             }
-        ){
+        ) {
             Text(text = "Cart") //todo: make it an icon!
         }
 
@@ -54,20 +59,32 @@ fun MainScreen(
     }
 
     /** ITEMS **/
-    Column (
+    Column(
         modifier = Modifier
             .padding(start = 50.dp, end = 50.dp)
             .fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-    ){
+    ) {
+
+        /** Test Carts & Orders */
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = {
+                navController.navigate(route = Screens.TestCartOrdersScreen.route)
+            }
+        ) {
+            Text(text = "Test Carts And Orders Screen")
+        }
+
+
         /** GET ITEMS */
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
                 navController.navigate(route = Screens.TEMPItemsScreen.route)
             }
-        ){
+        ) {
             Text(text = "Get Item Data")
         }
 
@@ -77,18 +94,8 @@ fun MainScreen(
             onClick = {
                 navController.navigate(route = Screens.AddItemScreen.route)
             }
-        ){
+        ) {
             Text(text = "ADD Item Data")
-        }
-
-        /** TODO: REMOVE */
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = {
-                mainActivity.reloadActivity()
-            }
-        ){
-            Text(text = "Reload this screen")
         }
 
         Button(

@@ -1,9 +1,4 @@
 package com.example.bakeryapp.util
-
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-
-
 /* Firebase collection */
 
 //val database = Firebase.firestore
@@ -11,6 +6,7 @@ import com.google.firebase.ktx.Firebase
 const val ordersCol = "orders"
 const val itemsCol = "items"
 const val materialsCol = "materials"
+const val cartsCol = "carts"
 
 /* Common loading state class for observers */
 

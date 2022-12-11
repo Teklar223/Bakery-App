@@ -28,6 +28,16 @@ fun NavGraph(
             )
         }
 
+        /** Admin Create Order Screen  **/
+        /** *** TEMP ITEMS SCREEN *** **/
+        composable( //TODO: remove when its done
+            route = Screens.TestCartOrdersScreen.route
+        ){
+            TestCartOrdersScreen(
+                navController = navController,
+                sharedViewModel = sharedViewModel
+            )
+        }
         /** *** MAIN SCREEN *** **/
         composable(
             route = Screens.MainScreen.route

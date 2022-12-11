@@ -28,7 +28,7 @@ import com.example.bakeryapp.util.*
 @Composable
 fun TestCartOrdersScreen(
     navController: NavController,
-    sharedViewModel: SharedViewModel,
+    sharedViewModel: SharedViewModel
 ) {
     var products: List<ItemData> by remember { mutableStateOf(listOf()) }
     var cart: Cart by remember { mutableStateOf(Cart()) }
@@ -48,18 +48,18 @@ fun TestCartOrdersScreen(
         .fillMaxWidth()
         .padding(8.dp)) {
         PopulateOrdersButton(sharedViewModel)
-        Header(text = "Products")
-        ProductItemList(products)
+        _Header(text = "Products")
+        _ProductItemList(products)
         { product -> cart = cart.addItemIncrease(product) }
 
-        Header(text = "Cart items")
-        CartItemList(cart)
+        _Header(text = "Cart items")
+        _CartItemList(cart)
         { newCart -> cart = newCart }
     }
 }
 
 @Composable
-fun Header(text: String) {
+fun _Header(text: String) {
     Text(
         modifier = Modifier.padding(6.dp),
         text = text,
@@ -69,7 +69,7 @@ fun Header(text: String) {
 
 /**  Product List -  shows all items in the application  **/
 @Composable
-fun ProductItemList(
+fun _ProductItemList(
     products: List<ItemData>,
     addItem: (itemData: ItemData) -> Unit,
 ) {
@@ -85,7 +85,7 @@ fun ProductItemList(
                         Text(text = item.name, style = TextStyle(fontSize = 24.sp))
                         Text(text = item.description, style = TextStyle(fontSize = 16.sp))
                     }
-                    AddItemButton(item = item) { addItem(it) }
+                    _AddItemButton(item = item) { addItem(it) }
                 }
             }
         }
@@ -95,7 +95,7 @@ fun ProductItemList(
 
 /**  Cart List -  shows all items in the the current user's cart (LOGGED IN ONLY)  **/
 @Composable
-fun CartItemList(
+fun _CartItemList(
     cart: Cart,
     update: (cart: Cart) -> Unit,
 ) {
@@ -113,7 +113,7 @@ fun CartItemList(
                         Text(text = "Amount: ${cartItem.amount}",
                             style = TextStyle(fontSize = 16.sp))
                     }
-                    RemoveItemButton(item = cartItem) { update(cart.removeItemDecrease(it)) }
+                    _RemoveItemButton(item = cartItem) { update(cart.removeItemDecrease(it)) }
                 }
             }
         }
@@ -148,7 +148,7 @@ fun PopulateOrdersButton(
 }
 
 @Composable
-fun AddItemButton(
+fun _AddItemButton(
     item: ItemData,
     addItem: (item: ItemData) -> Unit,
 ) {
@@ -169,7 +169,7 @@ fun AddItemButton(
 }
 
 @Composable
-fun RemoveItemButton(
+fun _RemoveItemButton(
     item: CartItem,
     removeItem: (item: CartItem) -> Unit,
 ) {

@@ -1,5 +1,7 @@
 package com.example.bakeryapp.util
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -16,13 +18,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import com.google.firebase.firestore.DocumentSnapshot
-
-
+import java.time.LocalDateTime
+import com.example.bakeryapp.util.*
 
 
 /**
  * This class is the "backend" of our application, responsible for all Firebase Auth and Cloudstore
  * DB actions.
+ * Except for 'Cart'
  */
 class SharedViewModel : ViewModel() {
     private lateinit var navController: NavController
@@ -85,6 +88,7 @@ class SharedViewModel : ViewModel() {
                 .collection(ordersCol)
                 .document(user.uid)
                 .collection(ordersCol)
+                .limit(ordersToShow.toLong())
                 .get()
                 .tryAwaitList(OrdersData::class.java)
                 .map {  /* per order */
@@ -106,7 +110,7 @@ class SharedViewModel : ViewModel() {
 
     }
 
-    suspend fun insertOrder(orderData: OrdersData) {
+    private suspend fun insertOrder(orderData: OrdersData) {
         AuthInfo.user?.let { user ->
             val newDoc = Firebase.firestore
                 .collection(ordersCol)
@@ -119,6 +123,30 @@ class SharedViewModel : ViewModel() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O) //LocalDateTime.now() triggers if phone has access to api 26
+    fun checkout(cart: Cart) = viewModelScope.launch {
+        AuthInfo.user?.let { user ->
+            val itemList: MutableList<OrderItem> = mutableListOf()
+            var totalCost = 0
+            for (itemWrapper in cart.items) {
+                totalCost += itemWrapper.item.cost * itemWrapper.amount
+                itemList.add(
+                    OrderItem(
+                        itemId = itemWrapper.item.itemId,
+                        itemWrapper.amount
+                    )
+                )
+            }
+
+            val order = OrdersData(
+                userId = user.uid,
+                list = itemList,
+                totalPrice = totalCost,
+                date = LocalDateTime.now().toString()
+            )
+            insertOrder(order)
+        }
+    }
 
     // function to populate orders
     fun populateOrders() = viewModelScope.launch {

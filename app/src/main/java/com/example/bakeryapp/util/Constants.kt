@@ -1,12 +1,16 @@
 package com.example.bakeryapp.util
-/* Firebase collection */
 
+//POTENTIAL TODO: make this something like a sealed class?
+/* Firebase collection */
 //val database = Firebase.firestore
 //val dbRegion = "eur3"
 const val ordersCol = "orders"
 const val itemsCol = "items"
 const val materialsCol = "materials"
 const val cartsCol = "carts"
+
+/* Business logic constants */
+const val ordersToShow = 2
 
 /* Common loading state class for observers */
 

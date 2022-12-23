@@ -1,8 +1,11 @@
 package com.example.bakeryapp.screen
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -160,51 +163,58 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(18.dp))
 
-                    val context = LocalContext.current
-                    val token = stringResource(R.string.default_web_client_id)
+                    //googleButton(launcher = launcher) //TODO!
 
-                OutlinedButton(
-                    border = ButtonDefaults.outlinedBorder.copy(width = 1.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    onClick = {
-                        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                            .requestIdToken(token)
-                            .requestEmail()
-                            .build()
 
-                        val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                        launcher.launch(googleSignInClient.signInIntent)
-                    },
-                    content = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                            content = {
-                                Icon(
-                                    tint = Color.Unspecified,
-                                    painter = painterResource(id = com.firebase.ui.auth.R.drawable.googleg_standard_color_18),
-                                    contentDescription = null,
-                                )
-                                Text(
-                                    style = MaterialTheme.typography.button,
-                                    color = MaterialTheme.colors.onSurface,
-                                    text = "Google"
-                                )
-                                Icon(
-                                    tint = Color.Transparent,
-                                    imageVector = Icons.Default.MailOutline,
-                                    contentDescription = null,
-                                )
-                            }
-                        )
-                    }
-                )
+
 
             }
         )
     }
 )
+}
+
+@Composable
+private fun googleButton(launcher: ManagedActivityResultLauncher<Intent, ActivityResult>){
+    val context = LocalContext.current
+    val token = stringResource(R.string.default_web_client_id)
+    OutlinedButton(
+        border = ButtonDefaults.outlinedBorder.copy(width = 1.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp),
+        onClick = {
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(token)
+                .requestEmail()
+                .build()
+
+            val googleSignInClient = GoogleSignIn.getClient(context, gso)
+            launcher.launch(googleSignInClient.signInIntent)
+        },
+        content = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                content = {
+                    Icon(
+                        tint = Color.Unspecified,
+                        painter = painterResource(id = com.firebase.ui.auth.R.drawable.googleg_standard_color_18),
+                        contentDescription = null,
+                    )
+                    Text(
+                        style = MaterialTheme.typography.button,
+                        color = MaterialTheme.colors.onSurface,
+                        text = "Google"
+                    )
+                    Icon(
+                        tint = Color.Transparent,
+                        imageVector = Icons.Default.MailOutline,
+                        contentDescription = null,
+                    )
+                }
+            )
+        }
+    )
 }

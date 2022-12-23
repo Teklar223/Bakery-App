@@ -23,8 +23,7 @@ class Cart(
             return size
         }
 
-    //  increases cart item amount
-    //  if item exists -> only increase amount property
+    /** adds an item to the cart, if item exists -> only increase amount property */
     fun addItemIncrease(itemData: ItemData, by: Int = 1): Cart {
         for (i in 0 until items.size) {
             val check = items[i].item
@@ -43,8 +42,7 @@ class Cart(
         newCart.save()
         return newCart
     }
-    //  decreases cart item amount
-    //  removes if amount reaches 0
+    /** adds an item to the cart if its empty, otherwise -> only decreases amount property */
     fun removeItemDecrease(cartItem: CartItem, by: Int = 1): Cart {
         for (i in 0 until items.size) {
             val check = items[i].item

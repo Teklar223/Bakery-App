@@ -4,7 +4,6 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
@@ -28,12 +27,7 @@ import com.example.bakeryapp.util.*
  * Except for 'Cart'
  */
 class SharedViewModel : ViewModel() {
-    private lateinit var navController: NavController
     val loadingState = MutableStateFlow(LoadingState.IDLE)
-
-    fun setNav(navController: NavController) {
-        this.navController = navController
-    }
 
     /* ************************************************************************************** */
     /* ************************************* Auth ******************************************* */
@@ -148,7 +142,7 @@ class SharedViewModel : ViewModel() {
         }
     }
 
-    // function to populate orders
+    // function to populate orders TODO: DEPRECATE
     fun populateOrders() = viewModelScope.launch {
         AuthInfo.user?.let { user ->
             val items = getItems()
@@ -194,6 +188,8 @@ class SharedViewModel : ViewModel() {
 /* ************************************* Helpers **************************************** */
 /* ************************************************************************************** */
 
+/** General purpose wrapper for handling Task<QuerySnapshot> results from Firebase,
+ *  and converting them to our data classes */
 suspend fun <T> Task<QuerySnapshot>.tryAwaitList(classData: Class<T>): MutableList<T> {
     return try {
         withContext(Dispatchers.IO) {
@@ -206,6 +202,8 @@ suspend fun <T> Task<QuerySnapshot>.tryAwaitList(classData: Class<T>): MutableLi
     }
 }
 
+/** General purpose wrapper for handling Task<DocumentSnapshot> results from Firebase,
+ *  and converting them to our data classes */
 suspend fun <T> Task<DocumentSnapshot>.tryAwait(classData: Class<T>): T? {
     return try {
         // resource fetch at io

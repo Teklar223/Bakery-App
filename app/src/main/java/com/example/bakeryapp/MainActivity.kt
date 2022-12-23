@@ -42,7 +42,6 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     navController = rememberNavController()
-                    sharedViewModel.setNav(navController)
                     NavGraph(
                         navController = navController,
                         sharedViewModel = sharedViewModel,

@@ -67,6 +67,7 @@ fun MainScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
+        /*
         /** Test Carts & Orders */
         Button(
             modifier = Modifier.fillMaxWidth(),
@@ -76,7 +77,7 @@ fun MainScreen(
         ) {
             Text(text = "Test Carts And Orders Screen")
         }
-
+        */
 
         /** GET ITEMS */
         Button(
@@ -88,6 +89,7 @@ fun MainScreen(
             Text(text = "Get Item Data")
         }
 
+        /*
         /** ADD ITEMS */
         Button(
             modifier = Modifier.fillMaxWidth(),
@@ -97,6 +99,7 @@ fun MainScreen(
         ) {
             Text(text = "ADD Item Data")
         }
+        */
 
         Button(
             modifier = Modifier.fillMaxWidth(),

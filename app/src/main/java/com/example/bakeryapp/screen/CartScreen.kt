@@ -1,5 +1,7 @@
 package com.example.bakeryapp.screen
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -26,7 +28,7 @@ fun CartScreen(
     sharedViewModel: SharedViewModel
 ) {
     var cart: Cart by remember { mutableStateOf(Cart()) }
-
+    // # TODO: add a +/- buttons instead of remove (add/remove)
     LaunchedEffect(key1 = cart) {
         cart = CartRepository.getSessionCart()
     }
@@ -60,6 +62,7 @@ fun CartScreen(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun cartHeader(sharedViewModel: SharedViewModel, text: String, cart: Cart) {
     Text(

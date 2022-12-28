@@ -1,24 +1,23 @@
 package com.example.bakeryapp.util
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.bakeryapp.util.*
 import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.AuthResult
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.*
-import kotlinx.coroutines.tasks.await
-import com.google.firebase.auth.AuthCredential
-import com.google.firebase.auth.AuthResult
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
-import com.google.firebase.firestore.DocumentSnapshot
+import kotlinx.coroutines.tasks.await
 import java.time.LocalDateTime
-import com.example.bakeryapp.util.*
+import com.google.firebase.auth.*
 
 
 /**
@@ -56,11 +55,12 @@ class SharedViewModel : ViewModel() {
             loadingState.emit(LoadingState.error(e.localizedMessage))
         }
     }
+
     fun registerWithEmailAndPassword(
         email: String,
         password: String,
         posCallback: () -> Unit,
-        error: (e: java.lang.Exception) -> Unit,
+        error: (e: java.lang.Exception) -> Unit
     ) = viewModelScope.launch {
         try {
             loadingState.emit(LoadingState.LOADING)
@@ -80,10 +80,21 @@ class SharedViewModel : ViewModel() {
         }
     }
 
-    fun signWithCredential(credential: AuthCredential) = viewModelScope.launch {
+    fun signWithCredential(
+        credential: AuthCredential,
+        posCallback: () -> Unit,
+        error: (e: java.lang.Exception) -> Unit
+    ) = viewModelScope.launch {
         try {
             loadingState.emit(LoadingState.LOADING)
-            AuthInfo.auth.signInWithCredential(credential).await()
+            AuthInfo.auth.signInWithCredential(credential)
+                .addOnCompleteListener { task: Task<AuthResult> ->
+                    if (task.isSuccessful) {
+                        posCallback()
+                    } else if (task.exception != null) {
+                        error(task.exception!!)
+                    }
+                }
             loadingState.emit(LoadingState.LOADED)
         } catch (e: Exception) {
             loadingState.emit(LoadingState.error(e.localizedMessage))
@@ -93,6 +104,7 @@ class SharedViewModel : ViewModel() {
     fun signOut() {
         AuthInfo.auth.signOut()
         AuthInfo.user = null
+        AuthInfo.isAdmin.value = false
     }
 
     /* ************************************************************************************** */
@@ -165,29 +177,6 @@ class SharedViewModel : ViewModel() {
         }
     }
 
-    // function to populate orders TODO: DEPRECATE
-    fun populateOrders() = viewModelScope.launch {
-        AuthInfo.user?.let { user ->
-            val items = getItems()
-            for (i in 0 until 10) {
-                val list: MutableList<OrderItem> = mutableListOf()
-                for (j in 0 until 3) {
-                    list.add(
-                        OrderItem(
-                            itemId = items.random().itemId,
-                            ((Math.random() * 3) + 1).toInt()
-                        )
-                    )
-                }
-                val order = OrdersData(
-                    user.uid,
-                    list
-                )
-                insertOrder(order)
-            }
-        }
-    }
-
     /* ************************************************************************************** */
     /* ***************************** Items and Materials ************************************ */
     /* ************************************************************************************** */
@@ -204,6 +193,20 @@ class SharedViewModel : ViewModel() {
             .collection(materialsCol)
             .get()
             .tryAwaitList(MaterialsData::class.java)
+    }.await()
+
+    suspend fun checkAdmin(email: String) = CoroutineScope(Dispatchers.IO).async {
+
+        var admins = Firebase.firestore
+            .collection(adminsCol)
+            .get()
+            .tryAwaitList(AdminData::class.java)
+
+        for (item in admins) {
+            if (item.ID == email) {
+                return@async true
+            }
+        }
     }.await()
 }
 

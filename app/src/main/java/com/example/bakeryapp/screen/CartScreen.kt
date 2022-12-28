@@ -28,7 +28,6 @@ fun CartScreen(
     sharedViewModel: SharedViewModel
 ) {
     var cart: Cart by remember { mutableStateOf(Cart()) }
-    // # TODO: add a +/- buttons instead of remove (add/remove)
     LaunchedEffect(key1 = cart) {
         cart = CartRepository.getSessionCart()
     }

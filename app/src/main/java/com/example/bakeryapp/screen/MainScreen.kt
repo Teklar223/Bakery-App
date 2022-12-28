@@ -1,5 +1,6 @@
 package com.example.bakeryapp.screen
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
@@ -22,13 +23,27 @@ import androidx.navigation.NavController
 import com.example.bakeryapp.MainActivity
 import com.example.bakeryapp.nav.Screens
 import com.example.bakeryapp.util.*
+import com.example.bakeryapp.util.AuthInfo.isAdmin
 
 @Composable
 fun MainScreen(
     navController: NavController,
     sharedViewModel: SharedViewModel,
     mainActivity: MainActivity
-){
+) {
+    isAdmin = remember { mutableStateOf(true) }
+    LaunchedEffect(key1 = isAdmin)
+    {
+        if (AuthInfo.user == null) {
+            isAdmin.value = false
+        } else {
+            var mid = sharedViewModel.checkAdmin(AuthInfo.user?.email.toString())
+            if (mid is Boolean) {
+                isAdmin.value = mid
+            }
+            Log.d("ISADMIN", isAdmin.toString())
+        }
+    }
     /** TOP BAR **/
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -40,9 +55,11 @@ fun MainScreen(
             onClick = {
                 if (AuthInfo.user != null) // only logged in users are allowed
                     navController.navigate(route = Screens.OrdersScreen.route)
-                else Toast.makeText(mainActivity,
+                else Toast.makeText(
+                    mainActivity,
                     "Only logged in users are allowed to view this screen",
-                    Toast.LENGTH_LONG).show()
+                    Toast.LENGTH_LONG
+                ).show()
             }
         ) {
             Text(text = "My Orders")
@@ -54,7 +71,8 @@ fun MainScreen(
                 navController.navigate(route = Screens.CartScreen.route)
             }
         ) {
-            Text(text = "Cart") //todo: make it an icon!
+            Text(text = isAdmin.value.toString()) //todo: make it an icon!
+            // TODO: RETURN TEXT TO BE CART!
         }
 
         /** Login OR Sign-out **/
@@ -65,8 +83,6 @@ fun MainScreen(
         )
 
     }
-
-    /** ITEMS **/
     Column(
         modifier = Modifier
             .padding(start = 50.dp, end = 50.dp)
@@ -74,26 +90,24 @@ fun MainScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        /** User view */
 
-        RenderItems(navController = navController, sharedViewModel = sharedViewModel)
+        /** Admin only View */
+        if (isAdmin.value) {
+            RenderMaterials(navController = navController, sharedViewModel = sharedViewModel)
 
-        /* ADD ITEMS */
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = {
-                navController.navigate(route = Screens.AddItemScreen.route)
+            /* ADD ITEMS */
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    navController.navigate(route = Screens.AddItemScreen.route)
+                }
+            ) {
+                Text(text = "ADD Item Data")
             }
-        ) {
-            Text(text = "ADD Item Data")
         }
-
-        /** Admin View */
-
-        RenderMaterials(navController = navController, sharedViewModel = sharedViewModel)
+        /** User + Admin view */
+        RenderItems(navController = navController, sharedViewModel = sharedViewModel)
     }
-
-
 }
 
 @Composable
@@ -101,23 +115,22 @@ private fun AuthButton(
     navController: NavController,
     sharedViewModel: SharedViewModel,
     mainActivity: MainActivity
-){
-    if (AuthInfo.user == null){
+) {
+    if (AuthInfo.user == null) {
         Button(
             onClick = {
                 navController.navigate(route = Screens.LoginScreen.route)
             }
-        ){
+        ) {
             Text(text = "Login")
         }
-    }
-    else{
+    } else {
         Button(
             onClick = {
                 sharedViewModel.signOut()
                 mainActivity.reloadActivity()
             }
-        ){
+        ) {
             Text(text = "Sign-Out")
         }
     }
@@ -131,6 +144,7 @@ fun RenderItems(
     /**
      * Retrieves item data from firebase and composes it on screen
      */
+
     var products: List<ItemData> by remember { mutableStateOf(listOf()) }
     var cart: Cart by remember { mutableStateOf(Cart()) }
 
@@ -223,7 +237,7 @@ fun ProductItemList(
 fun RenderMaterials(
     navController: NavController,
     sharedViewModel: SharedViewModel
-){
+) {
     var materials: List<MaterialsData> by remember { mutableStateOf(listOf()) }
 
     LaunchedEffect(key1 = materials)

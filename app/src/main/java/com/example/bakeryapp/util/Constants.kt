@@ -5,11 +5,12 @@ const val ordersCol = "orders"
 const val itemsCol = "items"
 const val materialsCol = "materials"
 const val cartsCol = "carts"
+const val adminsCol = "admins"
 
 /* Business logic constants */
 const val ordersToShow = 10
 
-/* Common loading state class for observers */
+/* Common classes */
 
 data class LoadingState private constructor(val status: Status, val msg: String? = null) {
     companion object {
@@ -27,3 +28,6 @@ data class LoadingState private constructor(val status: Status, val msg: String?
     }
 }
 
+data class AdminData(
+    var ID: String = ""
+)

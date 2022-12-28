@@ -2,6 +2,7 @@ package com.example.bakeryapp.screen
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -49,15 +50,18 @@ fun LoginScreen(
     val scope = rememberCoroutineScope()
 
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
-        navController.popBackStack()
         val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
         try {
             val account = task.getResult(ApiException::class.java)!!
             val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-            sharedViewModel.signWithCredential(credential)
-            navController.popBackStack()
+            sharedViewModel.signWithCredential(
+                credential,
+                { mainActivity.reloadActivity() }, /* positive result */
+                { Toast.makeText(mainActivity, "Google sign in failed", Toast.LENGTH_LONG)
+                    .show() /* negative result */
+                })
         } catch (e: ApiException) {
-            //Log.w("TAG", "Google sign in failed", e)
+            Log.w("TAG", "Google sign in CRITICAL failure", e)
         }
     }
 

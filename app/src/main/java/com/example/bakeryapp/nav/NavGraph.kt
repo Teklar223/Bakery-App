@@ -1,5 +1,7 @@
 package com.example.bakeryapp.nav
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -8,6 +10,7 @@ import com.example.bakeryapp.MainActivity
 import com.example.bakeryapp.screen.*
 import com.example.bakeryapp.util.SharedViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavGraph(
     navController: NavHostController,
@@ -18,26 +21,7 @@ fun NavGraph(
         navController = navController,
         startDestination = Screens.MainScreen.route
     ){
-        /** *** TEMP ITEMS SCREEN *** **/
-        composable( //TODO: remove when its done
-            route = Screens.TEMPItemsScreen.route
-        ){
-            TEMPItemsScreen(
-                navController = navController,
-                sharedViewModel = sharedViewModel
-            )
-        }
 
-        /** Admin Create Order Screen  **/
-        /** *** TEMP ITEMS SCREEN *** **/
-        composable( //TODO: remove when its done
-            route = Screens.TestCartOrdersScreen.route
-        ){
-            TestCartOrdersScreen(
-                navController = navController,
-                sharedViewModel = sharedViewModel
-            )
-        }
         /** *** MAIN SCREEN *** **/
         composable(
             route = Screens.MainScreen.route
@@ -85,16 +69,6 @@ fun NavGraph(
             route = Screens.AddItemScreen.route
         ){
             AddItemScreen(
-                navController = navController,
-                sharedViewModel = sharedViewModel
-            )
-        }
-
-        /** *** GET MATERIALS SCREEN *** **/
-        composable(
-            route = Screens.MaterialsScreen.route
-        ){
-            MaterialsScreen(
                 navController = navController,
                 sharedViewModel = sharedViewModel
             )

@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "1064327868130",
+    "firebase_url": "https://bakeryfirestore-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "bakeryfirestore",
     "storage_bucket": "bakeryfirestore.appspot.com"
   },
@@ -13,6 +14,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "1064327868130-3p8ltvom8b562pfh6jg5bcc4cbgmg4j4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.bakeryapp",
+            "certificate_hash": "53e85f5bd321c46451ecd10d4632ec625871d635"
+          }
+        },
         {
           "client_id": "1064327868130-7b8m51ntoi46ljb0n9hjdde8garokl15.apps.googleusercontent.com",
           "client_type": 3

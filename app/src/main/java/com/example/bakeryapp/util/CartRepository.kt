@@ -12,6 +12,8 @@ class CartRepository {
     companion object {
         var cart: Cart? = null
 
+        /** this method is in charge of syncing the cart object with the server */
+        // encapsulates getCart() and saveNewCart()
         suspend fun getSessionCart(): Cart {
             if (cart == null) {
                 AuthInfo.user?.let { user ->
@@ -56,7 +58,7 @@ class CartRepository {
         }
 
 
-        suspend fun getCart(): Cart? {
+        private suspend fun getCart(): Cart? {
             return AuthInfo.user?.let { user ->
                 withContext(Dispatchers.IO) { /* jump to IO thread */
                     Firebase.firestore

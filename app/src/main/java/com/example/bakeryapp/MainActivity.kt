@@ -1,9 +1,11 @@
 package com.example.bakeryapp
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -22,18 +24,19 @@ class MainActivity : ComponentActivity() {
     private val sharedViewModel: SharedViewModel by viewModels()
     private lateinit var navController: NavHostController
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         //initiating auth
         AuthInfo.auth = FirebaseAuth.getInstance()
         AuthInfo.user = AuthInfo.auth.currentUser
-
         //initiating screens
         showMain()
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun showMain() {
         setContent {
             BakeryTheme {
@@ -42,7 +45,6 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     navController = rememberNavController()
-                    sharedViewModel.setNav(navController)
                     NavGraph(
                         navController = navController,
                         sharedViewModel = sharedViewModel,

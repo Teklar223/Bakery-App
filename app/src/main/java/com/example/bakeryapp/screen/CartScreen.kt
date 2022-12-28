@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -22,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.bakeryapp.util.*
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CartScreen(
     navController: NavController,
@@ -117,7 +117,8 @@ fun CartItemList(
                             style = TextStyle(fontSize = 16.sp)
                         )
                     }
-                    RemoveItemButton(item = cartItem) { update(cart.removeItemDecrease(it)) }
+                    _RemoveItemButton(item = cartItem) { update(cart.removeCartItemDecrease(it)) }
+                    _AddItemButton(item = cartItem) { update(cart.addCartItemIncrease(it)) }
                 }
             }
         }
@@ -125,7 +126,7 @@ fun CartItemList(
 }
 
 @Composable
-fun RemoveItemButton(
+fun _RemoveItemButton(
     item: CartItem,
     removeItem: (item: CartItem) -> Unit,
 ) {
@@ -134,12 +135,33 @@ fun RemoveItemButton(
             backgroundColor = Color.Black,
             contentColor = Color.White
         ),
-        modifier = Modifier.fillMaxWidth(0.85f),
+        modifier = Modifier.fillMaxWidth(0.5f),
         onClick = {
             removeItem(item)
         }) {
         Text(
-            text = "Remove",
+            text = "-",
+            style = TextStyle(fontSize = 18.sp)
+        )
+    }
+}
+
+@Composable
+fun _AddItemButton(
+    item: CartItem,
+    removeItem: (item: CartItem) -> Unit,
+) {
+    Button(
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = Color.Black,
+            contentColor = Color.White
+        ),
+        modifier = Modifier.fillMaxWidth(0.5f),
+        onClick = {
+            removeItem(item)
+        }) {
+        Text(
+            text = "+",
             style = TextStyle(fontSize = 18.sp)
         )
     }

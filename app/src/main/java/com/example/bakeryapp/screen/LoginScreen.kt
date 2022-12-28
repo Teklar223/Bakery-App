@@ -120,6 +120,7 @@ fun LoginScreen(
                         }
                     )
 
+                    /** Login Button*/
                     Button(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -138,6 +139,43 @@ fun LoginScreen(
                                         .show() /* negative result */
                                     }
                                 )
+                            }
+                        }
+                    )
+
+                    /** Register Button*/
+                    Button(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        enabled = userEmail.isNotEmpty() && userPassword.isNotEmpty(),
+                        content = {
+                            Text(text = "Register")
+                        },
+                        onClick = {
+                            if (userPassword.length > 6) {
+                                scope.launch {
+                                    sharedViewModel.registerWithEmailAndPassword(
+                                        email = userEmail.trim(),
+                                        password = userPassword.trim(),
+                                        { mainActivity.reloadActivity() }, /* positive result */
+                                        {
+                                            Toast.makeText(
+                                                mainActivity,
+                                                it.message,
+                                                Toast.LENGTH_LONG
+                                            )
+                                                .show() /* negative result */
+                                        }
+                                    )
+                                }
+                            }
+                            else{
+                                Toast.makeText(
+                                    mainActivity,
+                                    "Password must be longer than 6 characters!",
+                                    Toast.LENGTH_LONG
+                                ).show()
                             }
                         }
                     )
@@ -163,7 +201,7 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(18.dp))
 
-                    //googleButton(launcher = launcher) //TODO!
+                    googleButton(launcher = launcher)
 
 
 

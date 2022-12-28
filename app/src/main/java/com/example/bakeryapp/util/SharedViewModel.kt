@@ -56,6 +56,29 @@ class SharedViewModel : ViewModel() {
             loadingState.emit(LoadingState.error(e.localizedMessage))
         }
     }
+    fun registerWithEmailAndPassword(
+        email: String,
+        password: String,
+        posCallback: () -> Unit,
+        error: (e: java.lang.Exception) -> Unit,
+    ) = viewModelScope.launch {
+        try {
+            loadingState.emit(LoadingState.LOADING)
+
+            AuthInfo.auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task: Task<AuthResult> ->
+                    if (task.isSuccessful) {
+                        posCallback()
+                    } else if (task.exception != null) {
+                        error(task.exception!!)
+                    }
+                }
+
+            loadingState.emit(LoadingState.LOADED)
+        } catch (e: Exception) {
+            loadingState.emit(LoadingState.error(e.localizedMessage))
+        }
+    }
 
     fun signWithCredential(credential: AuthCredential) = viewModelScope.launch {
         try {

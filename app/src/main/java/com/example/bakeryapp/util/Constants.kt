@@ -1,8 +1,6 @@
 package com.example.bakeryapp.util
 
-/* Firebase collection */
-//val database = Firebase.firestore
-//val dbRegion = "eur3"
+/* Data logic collection */
 const val ordersCol = "orders"
 const val itemsCol = "items"
 const val materialsCol = "materials"

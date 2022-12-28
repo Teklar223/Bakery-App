@@ -58,7 +58,7 @@ class CartRepository {
         }
 
 
-        suspend fun getCart(): Cart? {
+        private suspend fun getCart(): Cart? {
             return AuthInfo.user?.let { user ->
                 withContext(Dispatchers.IO) { /* jump to IO thread */
                     Firebase.firestore

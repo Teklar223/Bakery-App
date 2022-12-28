@@ -42,8 +42,28 @@ class Cart(
         newCart.save()
         return newCart
     }
+    fun addCartItemIncrease(cartItem: CartItem, by: Int = 1): Cart {
+        for (i in 0 until items.size) {
+            val check = items[i].item
+            if (
+                check.itemId == cartItem.item.itemId
+                && check.name == cartItem.item.name
+            ) {
+                items[i].amount = items[i].amount + by
+                if (items[i].amount <= 0)
+                    items.add(items[i])
+                val newCart = Cart(items = items, userId = userId)
+                newCart.save()
+                return newCart
+            }
+        }
+
+        val newCart = Cart(items = items, userId = userId)
+        newCart.save()
+        return newCart
+    }
     /** adds an item to the cart if its empty, otherwise -> only decreases amount property */
-    fun removeItemDecrease(cartItem: CartItem, by: Int = 1): Cart {
+    fun removeCartItemDecrease(cartItem: CartItem, by: Int = 1): Cart {
         for (i in 0 until items.size) {
             val check = items[i].item
             if (
@@ -64,7 +84,7 @@ class Cart(
         return newCart
     }
 
-    fun save() { // saves the cart to database by user id
+    private fun save() { // saves the cart to database by user id
         FirebaseFirestore.getInstance()
             .collection(cartsCol)
             .document(userId)

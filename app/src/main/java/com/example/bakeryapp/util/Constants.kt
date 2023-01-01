@@ -1,18 +1,16 @@
 package com.example.bakeryapp.util
 
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-
-
-/* Firebase collection */
-
-//val database = Firebase.firestore
-//val dbRegion = "eur3"
+/* Data logic collection */
 const val ordersCol = "orders"
 const val itemsCol = "items"
 const val materialsCol = "materials"
+const val cartsCol = "carts"
+const val adminsCol = "admins"
 
-/* Common loading state class for observers */
+/* Business logic constants */
+const val ordersToShow = 10
+
+/* Common classes */
 
 data class LoadingState private constructor(val status: Status, val msg: String? = null) {
     companion object {
@@ -30,3 +28,6 @@ data class LoadingState private constructor(val status: Status, val msg: String?
     }
 }
 
+data class AdminData(
+    var ID: String = ""
+)

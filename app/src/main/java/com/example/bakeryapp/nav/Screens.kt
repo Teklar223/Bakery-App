@@ -6,11 +6,6 @@ sealed class Screens(val route: String){
     object CartScreen: Screens(route = "cart_screen")
     object OrdersScreen: Screens(route = "orders_screen")
     object AddItemScreen: Screens(route = "add_item_screen")
-    object TEMPItemsScreen: Screens(route = "temp_items_screen")
-    object MaterialsScreen: Screens(route = "materials_screen")
-    object AddMaterialScreen: Screens(route = "add_material_screen")
-    //TODO: remove 'TEMPItemsScreen' after it's dev' is done
-
     /**
      * Login screen is merged with registration via the firebase auth' library
      * */

@@ -71,8 +71,12 @@ fun MainScreen(
                 navController.navigate(route = Screens.CartScreen.route)
             }
         ) {
-            Text(text = isAdmin.value.toString()) //todo: make it an icon!
-            // TODO: RETURN TEXT TO BE CART!
+            if(AuthInfo.user != null){
+                Text(text = "hello " + AuthInfo.user?.email.toString())
+            }
+            else{
+                Text(text = "no user active")
+            }
         }
 
         /** Login OR Sign-out **/

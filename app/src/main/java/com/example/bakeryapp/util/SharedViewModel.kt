@@ -28,6 +28,14 @@ import com.google.firebase.auth.*
 class SharedViewModel : ViewModel() {
     val loadingState = MutableStateFlow(LoadingState.IDLE)
 
+    fun addItem(itemData: ItemData) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                AdminRepository.addItem(itemData)
+            }
+        }
+    }
+
     /* ************************************************************************************** */
     /* ************************************* Auth ******************************************* */
     /* ************************************************************************************** */
@@ -60,7 +68,7 @@ class SharedViewModel : ViewModel() {
         email: String,
         password: String,
         posCallback: () -> Unit,
-        error: (e: java.lang.Exception) -> Unit
+        error: (e: java.lang.Exception) -> Unit,
     ) = viewModelScope.launch {
         try {
             loadingState.emit(LoadingState.LOADING)
@@ -83,7 +91,7 @@ class SharedViewModel : ViewModel() {
     fun signWithCredential(
         credential: AuthCredential,
         posCallback: () -> Unit,
-        error: (e: java.lang.Exception) -> Unit
+        error: (e: java.lang.Exception) -> Unit,
     ) = viewModelScope.launch {
         try {
             loadingState.emit(LoadingState.LOADING)

@@ -1,35 +1,51 @@
 package com.example.bakeryapp.screen
 
+import android.content.res.Resources
+import android.graphics.drawable.BitmapDrawable
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.res.ResourcesCompat
 import androidx.navigation.NavController
 import com.example.bakeryapp.MainActivity
+import com.example.bakeryapp.R
 import com.example.bakeryapp.nav.Screens
 import com.example.bakeryapp.util.*
 import com.example.bakeryapp.util.AuthInfo.isAdmin
+import com.google.firebase.auth.FirebaseAuth
+import com.skydoves.landscapist.ImageOptions
+import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun MainScreen(
     navController: NavController,
     sharedViewModel: SharedViewModel,
-    mainActivity: MainActivity
+    mainActivity: MainActivity,
 ) {
     isAdmin = remember { mutableStateOf(true) }
     LaunchedEffect(key1 = isAdmin)
@@ -64,35 +80,49 @@ fun MainScreen(
         ) {
             Text(text = "My Orders")
         }
-
-        /** Cart **/
-        OutlinedButton(
-            onClick = {
-                navController.navigate(route = Screens.CartScreen.route)
+        if (!isAdmin.value && FirebaseAuth.getInstance().currentUser != null) { // admins & unauthenticated users do not see cart button
+            /** Cart **/
+            OutlinedButton(
+                onClick = {
+                    navController.navigate(route = Screens.CartScreen.route)
+                }
+            ) {
+                Text(text = "cart")
             }
-        ) {
-            Text(text = isAdmin.value.toString()) //todo: make it an icon!
-            // TODO: RETURN TEXT TO BE CART!
+        } else if (isAdmin.value) {
+            /** Add new item to app-item list **/
+            OutlinedButton(
+                onClick = {
+                    navController.navigate(route = Screens.AddItemScreen.route)
+                }
+            ) {
+                Text(text = "Add new item")
+            }
         }
-
         /** Login OR Sign-out **/
         AuthButton(
             navController = navController,
             sharedViewModel = sharedViewModel,
             mainActivity = mainActivity
         )
-
     }
     Column(
         modifier = Modifier
-            .padding(start = 50.dp, end = 50.dp)
+            .padding(start = 25.dp, end = 25.dp)
             .fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
+        Image(
+            painterResource(R.drawable.logo),
+            contentDescription = "",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.padding(top = 32.dp)
+        )
         /** Admin only View */
         if (isAdmin.value) {
+
             RenderMaterials(navController = navController, sharedViewModel = sharedViewModel)
 
             /* ADD ITEMS */
@@ -114,7 +144,7 @@ fun MainScreen(
 private fun AuthButton(
     navController: NavController,
     sharedViewModel: SharedViewModel,
-    mainActivity: MainActivity
+    mainActivity: MainActivity,
 ) {
     if (AuthInfo.user == null) {
         Button(
@@ -139,7 +169,7 @@ private fun AuthButton(
 @Composable
 fun RenderItems(
     navController: NavController,
-    sharedViewModel: SharedViewModel
+    sharedViewModel: SharedViewModel,
 ) {
     /**
      * Retrieves item data from firebase and composes it on screen
@@ -162,10 +192,11 @@ fun RenderItems(
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-
-        itemHeader(text = "Products")
-        ProductItemList(products)
-        { product -> cart = cart.addItemIncrease(product) }
+        if (!isAdmin.value) { // admins do not see the menu
+            itemHeader(text = "Menu")
+            ProductItemList(products)
+            { product -> cart = cart.addItemIncrease(product) }
+        }
     }
 }
 
@@ -191,7 +222,6 @@ fun AddItemButton(
             backgroundColor = Color.Black,
             contentColor = Color.White
         ),
-        modifier = Modifier.fillMaxWidth(0.85f),
         onClick = {
             addItem(item)
         },
@@ -212,31 +242,64 @@ fun ProductItemList(
     products: List<ItemData>,
     addItem: (itemData: ItemData) -> Unit,
 ) {
-    LazyColumn(
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 100.dp),
+        verticalArrangement = Arrangement.Center,
         modifier = Modifier
-            .fillMaxHeight(0.5f)
-            .fillMaxWidth()
-            .border(border = BorderStroke(1.dp, Color.LightGray), RoundedCornerShape(8.dp))
-            .padding(8.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color(243, 226, 204, 255))
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.Center
     ) {
-        products.forEach { item ->
-            items(1) {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.fillMaxWidth(0.5f)) {
-                        Text(text = item.name, style = TextStyle(fontSize = 24.sp))
-                        Text(text = item.description, style = TextStyle(fontSize = 16.sp))
+        for (product in products) {
+            item(span = {
+                // LazyGridItemSpanScope:
+                // maxLineSpan
+                GridItemSpan(1)
+            }) {
+                Column {
+                    GlideImage(
+                        imageModel = { product.image },
+                        modifier = Modifier
+                            .width(75.dp)
+                            .height(75.dp)
+                            .aspectRatio(1f),
+                        imageOptions = ImageOptions(contentScale = ContentScale.Fit)
+                    )
+                    Row(verticalAlignment = CenterVertically) {
+                        Column {
+                            Text(text = product.name,
+                                modifier = Modifier.padding(bottom = 2.dp),
+                                style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp))
+                            Text(text = product.description,
+                                style = TextStyle(fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Gray), modifier = Modifier.padding(2.dp))
+                        }
+                        if (FirebaseAuth.getInstance().currentUser != null) // only logged in accounts can add to cart
+                            IconButton(onClick = {
+                                addItem(product)
+                            }) {
+                                Image(painterResource(id = R.drawable.add),
+                                    modifier = Modifier
+                                        .width(20.dp)
+                                        .height(20.dp)
+                                        .padding(start = 8.dp),
+                                    contentDescription = "Add")
+                            }
                     }
-                    AddItemButton(item = item) { addItem(it) }
+
                 }
             }
         }
+
     }
 }
 
 @Composable
 fun RenderMaterials(
     navController: NavController,
-    sharedViewModel: SharedViewModel
+    sharedViewModel: SharedViewModel,
 ) {
     var materials: List<MaterialsData> by remember { mutableStateOf(listOf()) }
 
@@ -252,13 +315,7 @@ fun RenderMaterials(
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.End
     ) {
-        IconButton(
-            onClick = {
-                navController.popBackStack()
-            }
-        ) {
-            Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "back button")
-        }
+
     }
     Column(
         modifier = Modifier
@@ -273,7 +330,7 @@ fun RenderMaterials(
 
 @Composable
 fun MaterialsList(
-    materials: List<MaterialsData>
+    materials: List<MaterialsData>,
 ) {
     LazyColumn(
         modifier = Modifier

@@ -12,6 +12,7 @@ import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.bumptech.glide.Glide
 import com.example.bakeryapp.nav.NavGraph
 import com.example.bakeryapp.ui.theme.BakeryTheme
 import com.example.bakeryapp.util.AuthInfo
@@ -51,7 +52,7 @@ class MainActivity : ComponentActivity() {
                         mainActivity = this
                     )
                 }
-            }
+                }
         }
     }
 

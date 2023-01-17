@@ -56,6 +56,16 @@ fun NavGraph(
 
         /** *** ORDERS SCREEN *** **/
         composable(
+            route = Screens.OrdersScreenAdmin.route
+        ){
+            OrdersScreenAdmin(
+                navController = navController,
+                sharedViewModel = sharedViewModel
+            )
+        }
+
+        /** *** ORDERS SCREEN *** **/
+        composable(
             route = Screens.OrdersScreen.route
         ){
             OrdersScreen(
@@ -69,6 +79,15 @@ fun NavGraph(
             route = Screens.AddItemScreen.route
         ){
             AddItemScreen(
+                navController = navController,
+                sharedViewModel = sharedViewModel
+            )
+        }
+        /** *** ADD MATERIAL SCREEN *** **/
+        composable(
+            route = Screens.AddMaterialScreen.route
+        ){
+            AddMaterialScreen(
                 navController = navController,
                 sharedViewModel = sharedViewModel
             )

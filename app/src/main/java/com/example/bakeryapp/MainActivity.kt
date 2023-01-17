@@ -10,13 +10,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.bumptech.glide.Glide
 import com.example.bakeryapp.nav.NavGraph
 import com.example.bakeryapp.ui.theme.BakeryTheme
 import com.example.bakeryapp.util.AuthInfo
+import com.example.bakeryapp.util.CartRepository
 import com.example.bakeryapp.util.SharedViewModel
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /** An initiator class, in charge of starting the activity and init other needed objects */
 class MainActivity : ComponentActivity() {
@@ -31,8 +36,13 @@ class MainActivity : ComponentActivity() {
         //initiating auth
         AuthInfo.auth = FirebaseAuth.getInstance()
         AuthInfo.user = AuthInfo.auth.currentUser
+
+        lifecycleScope.launch { /* preload cart */
+            CartRepository.cart.value = CartRepository.getCart()
+        }
         //initiating screens
         showMain()
+
 
     }
 
@@ -51,7 +61,7 @@ class MainActivity : ComponentActivity() {
                         mainActivity = this
                     )
                 }
-            }
+                }
         }
     }
 

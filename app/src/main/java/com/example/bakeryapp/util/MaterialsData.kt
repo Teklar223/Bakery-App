@@ -7,5 +7,6 @@ data class MaterialsData(
     var cost: Int = 0,
     var currency: String = "shekel", //default is shekel
     var unit: String = "kg", // cost is calculated per unit, for example 5 per 1 kg
-    var contactInfo: String = "" //number or mail etc
+    var contactInfoName: String = "",
+    var contactInfoPhone: String = "" //number or mail etc
 )

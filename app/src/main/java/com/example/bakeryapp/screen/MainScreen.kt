@@ -14,32 +14,31 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.res.ResourcesCompat
 import androidx.navigation.NavController
 import com.example.bakeryapp.MainActivity
 import com.example.bakeryapp.R
 import com.example.bakeryapp.nav.Screens
 import com.example.bakeryapp.util.*
 import com.example.bakeryapp.util.AuthInfo.isAdmin
+import com.example.bakeryapp.util.CartRepository.Companion.cart
 import com.google.firebase.auth.FirebaseAuth
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
+import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 @Composable
 fun MainScreen(
@@ -47,18 +46,12 @@ fun MainScreen(
     sharedViewModel: SharedViewModel,
     mainActivity: MainActivity,
 ) {
-    isAdmin = remember { mutableStateOf(true) }
+    isAdmin = remember { mutableStateOf(false) }
+
     LaunchedEffect(key1 = isAdmin)
-    {
-        if (AuthInfo.user == null) {
-            isAdmin.value = false
-        } else {
-            var mid = sharedViewModel.checkAdmin(AuthInfo.user?.email.toString())
-            if (mid is Boolean) {
-                isAdmin.value = mid
-            }
-            Log.d("ISADMIN", isAdmin.toString())
-        }
+    { /* initial state is false */
+        isAdmin.value = sharedViewModel.checkAdmin(AuthInfo.user?.uid)
+        Log.d("ISADMIN", isAdmin.toString())
     }
     /** TOP BAR **/
     Row(
@@ -67,27 +60,24 @@ fun MainScreen(
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         /** Orders **/
-        OutlinedButton(
-            onClick = {
-                if (AuthInfo.user != null) // only logged in users are allowed
-                    navController.navigate(route = Screens.OrdersScreen.route)
-                else Toast.makeText(
-                    mainActivity,
-                    "Only logged in users are allowed to view this screen",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        ) {
-            Text(text = "My Orders")
-        }
+        OrdersButton(navController, mainActivity)
         if (!isAdmin.value && FirebaseAuth.getInstance().currentUser != null) { // admins & unauthenticated users do not see cart button
             /** Cart **/
             OutlinedButton(
+                modifier = Modifier.width(100.dp),
                 onClick = {
                     navController.navigate(route = Screens.CartScreen.route)
                 }
             ) {
-                Text(text = "cart")
+                Image(painterResource(R.drawable.ic_baseline_shopping_cart_24),
+                    contentDescription = "cart")
+                Text(text = (cart.value?.cartSize ?: 0).toString(),
+                    style = TextStyle(textAlign = TextAlign.Center, color = Color.White),
+                    modifier = Modifier
+                        .width(20.dp)
+                        .height(20.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color.Black))
             }
         } else if (isAdmin.value) {
             /** Add new item to app-item list **/
@@ -124,19 +114,32 @@ fun MainScreen(
         if (isAdmin.value) {
 
             RenderMaterials(navController = navController, sharedViewModel = sharedViewModel)
-
-            /* ADD ITEMS */
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    navController.navigate(route = Screens.AddItemScreen.route)
-                }
-            ) {
-                Text(text = "ADD Item Data")
-            }
         }
         /** User + Admin view */
         RenderItems(navController = navController, sharedViewModel = sharedViewModel)
+    }
+}
+
+@Composable
+fun OrdersButton(navController: NavController, mainActivity: MainActivity) {
+    if (!isAdmin.value) { // User Order History page
+        OutlinedButton(
+            onClick = {
+                if (AuthInfo.user != null) // only logged in users are allowed
+                    navController.navigate(route = Screens.OrdersScreen.route)
+                else Toast.makeText(
+                    mainActivity,
+                    "Only logged in users are allowed to view this screen",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        ) {
+            Text(text = "My Orders")
+        }
+    } else { //  Admin Order History page
+        OutlinedButton(
+            onClick = { navController.navigate(route = Screens.OrdersScreenAdmin.route) }
+        ) { Text(text = "Order History") }
     }
 }
 
@@ -175,13 +178,13 @@ fun RenderItems(
      * Retrieves item data from firebase and composes it on screen
      */
 
+    var scope = rememberCoroutineScope()
     var products: List<ItemData> by remember { mutableStateOf(listOf()) }
-    var cart: Cart by remember { mutableStateOf(Cart()) }
+    var cart by remember { CartRepository.cart }
 
     LaunchedEffect(key1 = products)
     {
         products = sharedViewModel.getItems()
-        products.forEach { println(it) }
     }
 
     LaunchedEffect(key1 = cart) {
@@ -195,7 +198,18 @@ fun RenderItems(
         if (!isAdmin.value) { // admins do not see the menu
             itemHeader(text = "Menu")
             ProductItemList(products)
-            { product -> cart = cart.addItemIncrease(product) }
+            { product ->
+                scope.launch {
+                    if (OrderRepository.isAtLimitCap(dateAsString(LocalDateTime.now()), product)) {
+                        Toast.makeText(navController.context,
+                            "This item cannot be ordered, cap reached.",
+                            Toast.LENGTH_LONG).show()
+                    } else {
+                        CartRepository.cart.value = cart?.addItemIncrease(product)
+                        OrderRepository.setLimitCap(dateAsString(LocalDateTime.now()),product)
+                    }
+                }
+            }
         }
     }
 }
@@ -266,30 +280,32 @@ fun ProductItemList(
                             .aspectRatio(1f),
                         imageOptions = ImageOptions(contentScale = ContentScale.Fit)
                     )
+
                     Row(verticalAlignment = CenterVertically) {
                         Column {
                             Text(text = product.name,
                                 modifier = Modifier.padding(bottom = 2.dp),
-                                style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp))
+                                style = TextStyle(fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp))
                             Text(text = product.description,
                                 style = TextStyle(fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.Gray), modifier = Modifier.padding(2.dp))
+                            if (FirebaseAuth.getInstance().currentUser != null) // only logged in accounts can add to cart
+                                IconButton(onClick = {
+                                    addItem(product)
+                                }) {
+                                    Image(painterResource(id = R.drawable.add),
+                                        modifier = Modifier
+                                            .width(25.dp)
+                                            .height(25.dp),
+                                        contentDescription = "Add")
+                                }
                         }
-                        if (FirebaseAuth.getInstance().currentUser != null) // only logged in accounts can add to cart
-                            IconButton(onClick = {
-                                addItem(product)
-                            }) {
-                                Image(painterResource(id = R.drawable.add),
-                                    modifier = Modifier
-                                        .width(20.dp)
-                                        .height(20.dp)
-                                        .padding(start = 8.dp),
-                                    contentDescription = "Add")
-                            }
                     }
 
                 }
+
             }
         }
 
@@ -306,7 +322,6 @@ fun RenderMaterials(
     LaunchedEffect(key1 = materials)
     {
         materials = sharedViewModel.getMaterials()
-        materials.forEach { println(it) }
     }
 
     Row(
@@ -325,6 +340,11 @@ fun RenderMaterials(
 
         itemHeader(text = "Materials")
         MaterialsList(materials)
+        Button(onClick = {
+            navController.navigate(Screens.AddMaterialScreen.route)
+        }) {
+            Text("Add new Material")
+        }
     }
 }
 
@@ -341,12 +361,16 @@ fun MaterialsList(
     ) {
         materials.forEach { item ->
             items(1) {
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Row(modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = CenterVertically) {
                     Column(modifier = Modifier.fillMaxWidth(0.5f)) {
-                        Text(text = item.name, style = TextStyle(fontSize = 24.sp))
-                        Text(text = item.description, style = TextStyle(fontSize = 16.sp))
-                        Text(text = item.contactInfo, style = TextStyle(fontSize = 16.sp))
+                        Text(text = item.name,
+                            style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold))
+                        Text(text = item.description,
+                            style = TextStyle(fontSize = 12.sp, color = Color.Gray))
                     }
+                    Text(text = "${item.contactInfoName} ${item.contactInfoPhone}",
+                        style = TextStyle(fontSize = 14.sp))
                 }
             }
         }

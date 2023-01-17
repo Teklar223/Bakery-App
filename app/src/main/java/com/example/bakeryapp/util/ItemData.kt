@@ -6,6 +6,7 @@ data class ItemData(
     var name: String = "",
     var image: String = "https://i.ibb.co/W3mwh3v/bun.png", // default image
     var description: String = "",
+    var limit: Int = 15,
     var cost: Int = -1,
     var currency: String = "shekel" //default is shekel
 )

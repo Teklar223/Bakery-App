@@ -42,28 +42,30 @@ import kotlinx.coroutines.launch
 fun LoginScreen(
     navController: NavController,
     sharedViewModel: SharedViewModel,
-    mainActivity: MainActivity
+    mainActivity: MainActivity,
 ) {
     var userEmail by remember { mutableStateOf("") }
     var userPassword by remember { mutableStateOf("") }
     val state by sharedViewModel.loadingState.collectAsState()
     val scope = rememberCoroutineScope()
 
-    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
-        val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
-        try {
-            val account = task.getResult(ApiException::class.java)!!
-            val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-            sharedViewModel.signWithCredential(
-                credential,
-                { mainActivity.reloadActivity() }, /* positive result */
-                { Toast.makeText(mainActivity, "Google sign in failed", Toast.LENGTH_LONG)
-                    .show() /* negative result */
-                })
-        } catch (e: ApiException) {
-            Log.w("TAG", "Google sign in CRITICAL failure", e)
+    val launcher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
+            try {
+                val account = task.getResult(ApiException::class.java)!!
+                val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
+                sharedViewModel.signWithCredential(
+                    credential,
+                    { mainActivity.reloadActivity() }, /* positive result */
+                    {
+                        Toast.makeText(mainActivity, "Google sign in failed", Toast.LENGTH_LONG)
+                            .show() /* negative result */
+                    })
+            } catch (e: ApiException) {
+                Log.w("TAG", "Google sign in CRITICAL failure", e)
+            }
         }
-    }
 
     Scaffold(
         topBar = {
@@ -139,8 +141,10 @@ fun LoginScreen(
                                     email = userEmail.trim(),
                                     password = userPassword.trim(),
                                     { mainActivity.reloadActivity() }, /* positive result */
-                                    { Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG)
-                                        .show() /* negative result */
+                                    {
+                                        mainActivity.reloadActivity()
+                                        Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG)
+                                            .show() /* negative result */
                                     }
                                 )
                             }
@@ -173,8 +177,7 @@ fun LoginScreen(
                                         }
                                     )
                                 }
-                            }
-                            else{
+                            } else {
                                 Toast.makeText(
                                     mainActivity,
                                     "Password must be longer than 6 characters!",
@@ -208,16 +211,14 @@ fun LoginScreen(
                     googleButton(launcher = launcher)
 
 
-
-
-            }
-        )
-    }
-)
+                }
+            )
+        }
+    )
 }
 
 @Composable
-private fun googleButton(launcher: ManagedActivityResultLauncher<Intent, ActivityResult>){
+private fun googleButton(launcher: ManagedActivityResultLauncher<Intent, ActivityResult>) {
     val context = LocalContext.current
     val token = stringResource(R.string.default_web_client_id)
     OutlinedButton(

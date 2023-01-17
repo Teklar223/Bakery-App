@@ -3,6 +3,8 @@ package com.example.bakeryapp.util
 /* Data logic collection */
 const val ordersCol = "orders"
 const val itemsCol = "items"
+const val limitCol = "limitcap"
+
 const val materialsCol = "materials"
 const val cartsCol = "carts"
 const val adminsCol = "admins"

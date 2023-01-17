@@ -18,6 +18,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.tasks.await
 import java.time.LocalDateTime
 import com.google.firebase.auth.*
+import com.google.firebase.firestore.auth.User
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.temporal.TemporalField
 
 
 /**
@@ -28,9 +32,31 @@ import com.google.firebase.auth.*
 class SharedViewModel : ViewModel() {
     val loadingState = MutableStateFlow(LoadingState.IDLE)
 
-    /* ************************************************************************************** */
-    /* ************************************* Auth ******************************************* */
-    /* ************************************************************************************** */
+    suspend fun getTodayOrders(): List<OrdersDataPopulated> {
+        return withContext(Dispatchers.IO) {
+            OrderRepository().getOrdersForDay()
+        }
+    }
+
+    fun addItem(itemData: ItemData) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                AdminRepository.addItem(itemData)
+            }
+        }
+    }
+
+    fun addMaterial(material: MaterialsData) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                AdminRepository.addMaterial(material)
+            }
+        }
+    }
+
+/* ************************************************************************************** */
+/* ************************************* Auth ******************************************* */
+/* ************************************************************************************** */
 
     fun signInWithEmailAndPassword(
         email: String,
@@ -60,7 +86,7 @@ class SharedViewModel : ViewModel() {
         email: String,
         password: String,
         posCallback: () -> Unit,
-        error: (e: java.lang.Exception) -> Unit
+        error: (e: java.lang.Exception) -> Unit,
     ) = viewModelScope.launch {
         try {
             loadingState.emit(LoadingState.LOADING)
@@ -83,7 +109,7 @@ class SharedViewModel : ViewModel() {
     fun signWithCredential(
         credential: AuthCredential,
         posCallback: () -> Unit,
-        error: (e: java.lang.Exception) -> Unit
+        error: (e: java.lang.Exception) -> Unit,
     ) = viewModelScope.launch {
         try {
             loadingState.emit(LoadingState.LOADING)
@@ -107,53 +133,64 @@ class SharedViewModel : ViewModel() {
         AuthInfo.isAdmin.value = false
     }
 
-    /* ************************************************************************************** */
-    /* ************************************ Orders ****************************************** */
-    /* ************************************************************************************** */
+/* ************************************************************************************** */
+/* ************************************ Orders ****************************************** */
+/* ************************************************************************************** */
+
 
     suspend fun getOrders(): List<OrdersDataPopulated> {
         return AuthInfo.user?.let { user ->
-            Firebase.firestore
+            OrderRepository.toPopulated(Firebase.firestore
                 .collection(ordersCol)
                 .document(user.uid)
                 .collection(ordersCol)
                 .limit(ordersToShow.toLong())
                 .get()
-                .tryAwaitList(OrdersData::class.java)
-                .map {  /* per order */
-                    val items =
-                        it.list.map { orderItem -> /* insert item contents  */
-                            OrderItemPopulated(
-                                item = itemById(
-                                    itemsCol,
-                                    orderItem.itemId,
-                                    ItemData::class.java
-                                ),
-                                amount = orderItem.amount
-                            )
-                        }
-                    /* return populated order */
-                    return@map OrdersDataPopulated(it.orderId, it.userId, items.toMutableList())
-                }
+                .tryAwaitList(OrdersData::class.java))
+
         } ?: run { listOf() } /* user not logged in */
 
     }
 
+    private suspend fun clearCart(cart: Cart) {
+        // clear session cart
+        CartRepository.clearSessionCart()
+        // clear cart from database
+        Firebase.firestore
+            .collection(cartsCol)
+            .document(cart.userId)
+            .set(CartRepository.cart.value!!)
+            .await()
+    }
+
     private suspend fun insertOrder(orderData: OrdersData) {
         AuthInfo.user?.let { user ->
-            val newDoc = Firebase.firestore
+            val doc = Firebase.firestore
                 .collection(ordersCol)
                 .document(user.uid)
-                .collection(ordersCol)
-                .add(orderData)
+            val exists = doc
+                .get()
                 .await()
-            val id = newDoc.id
-            newDoc.update("orderId", id)
+                .exists()
+            if (exists) {
+                val newOrder = doc.collection(ordersCol)
+                    .add(orderData)
+                    .await()
+
+                val id = newOrder.id
+                newOrder.update("orderId", id)
+            } else {
+                doc.set({})
+                val newOrder = doc.collection(ordersCol)
+                    .add(orderData)
+                    .await()
+                val id = newOrder.id
+                newOrder.update("orderId", id)
+            }
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O) //LocalDateTime.now() triggers if phone has access to api 26
-    fun checkout(cart: Cart) = viewModelScope.launch {
+    fun checkout(cart: Cart, localDate: LocalDateTime) = viewModelScope.launch {
         AuthInfo.user?.let { user ->
             val itemList: MutableList<OrderItem> = mutableListOf()
             var totalCost = 0
@@ -170,16 +207,20 @@ class SharedViewModel : ViewModel() {
             val order = OrdersData(
                 userId = user.uid,
                 list = itemList,
+                userName= user.email!!.split("@")[0],
                 totalPrice = totalCost,
-                date = LocalDateTime.now().toString()
+                date = localDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
             )
+            // save order
             insertOrder(order)
+            // clear cart
+            clearCart(cart)
         }
     }
 
-    /* ************************************************************************************** */
-    /* ***************************** Items and Materials ************************************ */
-    /* ************************************************************************************** */
+/* ************************************************************************************** */
+/* ***************************** Items and Materials ************************************ */
+/* ************************************************************************************** */
 
     suspend fun getItems() = CoroutineScope(Dispatchers.IO).async {
         return@async Firebase.firestore
@@ -195,18 +236,16 @@ class SharedViewModel : ViewModel() {
             .tryAwaitList(MaterialsData::class.java)
     }.await()
 
-    suspend fun checkAdmin(email: String) = CoroutineScope(Dispatchers.IO).async {
 
-        var admins = Firebase.firestore
+    // modified here to direct fetch by id
+    suspend fun checkAdmin(userId: String?) = CoroutineScope(Dispatchers.IO).async {
+        if (userId == null) return@async false
+        return@async Firebase.firestore
             .collection(adminsCol)
+            .document(userId)
             .get()
-            .tryAwaitList(AdminData::class.java)
-
-        for (item in admins) {
-            if (item.ID == email) {
-                return@async true
-            }
-        }
+            .await()
+            .exists()
     }.await()
 }
 

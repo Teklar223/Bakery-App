@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bakeryapp.R
 import com.example.bakeryapp.util.ItemData
+import com.example.bakeryapp.util.MaterialsData
 import com.example.bakeryapp.util.SharedViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.skydoves.landscapist.ImageOptions
@@ -32,18 +33,20 @@ import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.launch
 
 @Composable
-fun AddItemScreen(
+fun AddMaterialScreen(
     navController: NavController,
     sharedViewModel: SharedViewModel,
 ) {
 
     var isCurrencyMenuOpen by remember { mutableStateOf(false) }
+    var materialName by remember { mutableStateOf("") }
+    var materialUnit by remember { mutableStateOf("") }
+    var materialCost by remember { mutableStateOf("") }
+    var materialContactName by remember { mutableStateOf("") }
+    var materialContactPhone by remember { mutableStateOf("") }
 
-    var itemName by remember { mutableStateOf("") }
-    var itemDesc by remember { mutableStateOf("") }
-    var itemCost by remember { mutableStateOf("") }
-    var itemCurrency by remember { mutableStateOf("Shekel (₪)") }
-    var itemImage by remember { mutableStateOf("https://i.ibb.co/wCxBgrs/removebg-preview.png") }
+    var materialCurrency by remember { mutableStateOf("Shekel (₪)") }
+    var materialDesc by remember { mutableStateOf("") }
 
     /** main layout **/
     Column(modifier = Modifier.fillMaxSize()) {
@@ -68,48 +71,55 @@ fun AddItemScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth()) {
 
-            GlideImage(
-                imageModel = { itemImage },
-                imageOptions = ImageOptions(contentScale = ContentScale.Fit),
-                modifier = Modifier
-                    .height(100.dp)
-                    .width(100.dp))
 
-
-            AddItemTextField(name = "Item name", value = itemName) {
-                itemName = it
+            AddMaterialTextField(name = "Material name", value = materialName) {
+                materialName = it
             }
-            AddItemTextField(name = "Item Description", value = itemDesc) {
-                itemDesc = it
+            AddMaterialTextField(name = "Material Description", value = materialDesc) {
+                materialDesc = it
             }
-            AddItemTextField(name = "Item Cost",
+            AddMaterialTextField(name = "Material Unit", value = materialUnit) {
+                materialUnit = it
+            }
+            AddMaterialTextField(name = "Material Cost",
                 textType = KeyboardType.Decimal,
-                value = itemCost) {
-                itemCost = it
+                value = materialCost) {
+                materialCost = it
             }
-            AddItemTextField(name = "Image URL",
+            AddMaterialTextField(name = "Contact Name",
                 textType = KeyboardType.Text,
-                value = itemImage) {
-                itemImage = it
+                value = materialContactName) {
+                materialContactName = it
+            }
+            AddMaterialTextField(name = "Contact Phone",
+                textType = KeyboardType.Phone,
+                value = materialContactPhone) {
+                materialContactPhone = it
             }
 
             CurrencySelectionList(
                 isCurrencyMenuOpen = isCurrencyMenuOpen,
-                selected = itemCurrency,
+                selected = materialCurrency,
                 setCurrencyMenuOpen = { isCurrencyMenuOpen = it },
-                setSelected = { itemCurrency = it })
+                setSelected = { materialCurrency = it })
             Button(onClick = {
-                sharedViewModel.addItem(
-                    ItemData(itemId = "", name = itemName, description = itemDesc,
-                        cost = itemCost.toInt(), currency = itemCurrency,
-                        image = itemImage, limit = 15)
+                sharedViewModel.addMaterial(
+                    MaterialsData(
+                        materialId = "",
+                        name = materialName,
+                        description = materialDesc,
+                        cost = materialCost.toInt(),
+                        currency = materialCurrency,
+                        unit = materialUnit,
+                        contactInfoName = materialContactName,
+                        contactInfoPhone = materialContactPhone)
                 )
                 Toast.makeText(navController.context.applicationContext,
-                    "Added item successfully",
+                    "Added Material successfully",
                     Toast.LENGTH_LONG).show()
                 navController.popBackStack()
             }) {
-                Text("Add Item")
+                Text("Add Material")
             }
 
         }
@@ -117,52 +127,8 @@ fun AddItemScreen(
     }
 }
 
-
 @Composable
-fun CurrencySelectionList(
-    isCurrencyMenuOpen: Boolean,
-    setCurrencyMenuOpen: (Boolean) -> Unit,
-    selected: String,
-    setSelected: (String) -> Unit,
-) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .padding(top = 16.dp)
-            .border(BorderStroke(1.dp, Color.Black), RoundedCornerShape(1.dp))
-            .fillMaxWidth(0.8f)
-    ) {
-        // options button
-        IconButton(onClick = {
-            setCurrencyMenuOpen(true)
-        }) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Selected currency:", modifier = Modifier.padding(end = 8.dp))
-                Text(style = TextStyle(fontWeight = FontWeight.Bold), text = selected)
-            }
-        }
-        DropdownMenu(
-            expanded = isCurrencyMenuOpen, onDismissRequest = {
-                setCurrencyMenuOpen(false)
-            }, modifier = Modifier.fillMaxWidth(0.8f)) {
-            DropdownMenuItem(onClick = {
-                setSelected("Dollar (\$)")
-                setCurrencyMenuOpen(false)
-            }) {
-                Text("Dollar ($)")
-            }
-            DropdownMenuItem(onClick = {
-                setSelected("Shekel (₪)")
-                setCurrencyMenuOpen(false)
-            }) {
-                Text("Shekel (₪)")
-            }
-        }
-    }
-}
-
-@Composable
-fun AddItemTextField(
+fun AddMaterialTextField(
     name: String,
     value: String,
     textType: KeyboardType = KeyboardType.Text,
@@ -176,7 +142,6 @@ fun AddItemTextField(
             Text(text = "Enter ${name}")
         },
         onValueChange = {
-            if (textType == KeyboardType.Decimal && it.length > 5) return@OutlinedTextField
             onChange(it)
         }
     )

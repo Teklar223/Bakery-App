@@ -84,7 +84,7 @@ class Cart(
         return newCart
     }
 
-    private fun save() { // saves the cart to database by user id
+     fun save() { // saves the cart to database by user id
         FirebaseFirestore.getInstance()
             .collection(cartsCol)
             .document(userId)

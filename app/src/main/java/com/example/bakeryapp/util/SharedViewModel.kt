@@ -3,9 +3,11 @@ package com.example.bakeryapp.util
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bakeryapp.util.*
+import com.example.bakeryapp.util.AuthInfo.isAdmin
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.AuthResult
@@ -31,6 +33,13 @@ import java.time.temporal.TemporalField
  */
 class SharedViewModel : ViewModel() {
     val loadingState = MutableStateFlow(LoadingState.IDLE)
+
+    init {
+        viewModelScope.launch {
+            isAdmin.value = checkAdmin(AuthInfo.user?.uid)
+            Log.d("ISADMIN", isAdmin.toString())
+        }
+    }
 
     suspend fun getTodayOrders(): List<OrdersDataPopulated> {
         return withContext(Dispatchers.IO) {
@@ -207,7 +216,7 @@ class SharedViewModel : ViewModel() {
             val order = OrdersData(
                 userId = user.uid,
                 list = itemList,
-                userName= user.email!!.split("@")[0],
+                userName = user.email!!.split("@")[0],
                 totalPrice = totalCost,
                 date = localDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
             )

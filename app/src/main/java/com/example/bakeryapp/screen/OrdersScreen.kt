@@ -64,11 +64,11 @@ fun OrdersScreen(
 
         orders.value?.let { orders ->
             if (orders.isEmpty()) { /* no orders */
-                Text(text = "No orders....")
+                Text(text = "No orders....", modifier = Modifier.padding(16.dp))
             }
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 for (order in orders) {
-                    Text(text = "Order id: ${order.orderId}", modifier = Modifier.padding(8.dp))
+                    Text(text = order.date, modifier = Modifier.padding(8.dp))
                     OrderItemsList(order) /* item list */
                 }
             }

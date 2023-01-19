@@ -7,7 +7,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,20 +25,21 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.bakeryapp.util.OrdersDataPopulated
 import com.example.bakeryapp.util.SharedViewModel
+import com.example.bakeryapp.util.minus
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.TemporalUnit
 import java.util.Calendar.DAY_OF_WEEK
 
-fun dateAsString(date: LocalDateTime): String {// "03"
+
+fun dateAsString(date: LocalDateTime, full: Boolean = false): String {
     val dayS = ("0" + ((date.dayOfMonth + 1) % 31).toString())
     val day = dayS.slice(dayS.length - 2 until dayS.length)
     val monthS = ("0" + date.monthValue.toString())
     val month = monthS.slice(monthS.length - 2 until monthS.length)
-    return "${day}-${month}"
+    return if (full) "${day.minus(1)}-${month}-${date.year}" else "${day.minus(1)}-${month}"
 }
-
 
 
 @Composable
@@ -53,12 +58,31 @@ fun OrdersScreenAdmin(
         val ordersData = sharedViewModel.getTodayOrders()
         orders.value = ordersData
     }
+    Column {
+
+    /** Back button **/
+    Row(
+        modifier = Modifier
+            .padding(start = 15.dp, top = 15.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.Start
+    ) {
+        IconButton(
+            onClick = {
+                navController.popBackStack()
+            }
+        ) {
+            Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "back button")
+        }
+    }
+
     Column(modifier = Modifier.padding(16.dp)) {
         Text(style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 24.sp),
             text = "Orders - ${dateAsString(date)}")
         Spacer(modifier = Modifier.padding(16.dp))
         if (orders.value != null)
             OrderAdminList(orders.value!!)
+    }
     }
 
 }
@@ -80,10 +104,13 @@ fun OrderAdminList(list: List<OrdersDataPopulated>) {
     Text(text = "Summary: ", style = TextStyle(color = Color.Black, fontWeight = FontWeight.Bold))
     Column(modifier = Modifier
         .fillMaxWidth()
+        .padding(top = 8.dp)
         .background(Color(255, 196, 0, 255))
         .padding(12.dp)
         .clip(RoundedCornerShape(8.dp))) {
-        map.map { (k, v) ->
+
+
+        if (map.size < 1) Text(text = "No orders for today..") else map.map { (k, v) ->
             Text(text = k,
                 color = Color.White,
                 style = TextStyle(color = Color.Black, fontWeight = FontWeight.Bold),

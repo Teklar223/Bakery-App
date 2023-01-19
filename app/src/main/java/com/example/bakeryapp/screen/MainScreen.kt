@@ -1,7 +1,5 @@
 package com.example.bakeryapp.screen
 
-import android.content.res.Resources
-import android.graphics.drawable.BitmapDrawable
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -32,9 +30,10 @@ import com.example.bakeryapp.MainActivity
 import com.example.bakeryapp.R
 import com.example.bakeryapp.nav.Screens
 import com.example.bakeryapp.util.*
-import com.example.bakeryapp.util.AuthInfo.isAdmin
 import com.example.bakeryapp.util.CartRepository.Companion.cart
+import com.google.android.gms.auth.api.Auth
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firestore.v1.StructuredQuery.Order
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.launch
@@ -45,23 +44,20 @@ fun MainScreen(
     navController: NavController,
     sharedViewModel: SharedViewModel,
     mainActivity: MainActivity,
+    isAdmin: Boolean,
 ) {
-    isAdmin = remember { mutableStateOf(false) }
 
-    LaunchedEffect(key1 = isAdmin)
-    { /* initial state is false */
-        isAdmin.value = sharedViewModel.checkAdmin(AuthInfo.user?.uid)
-        Log.d("ISADMIN", isAdmin.toString())
-    }
     /** TOP BAR **/
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         /** Orders **/
-        OrdersButton(navController, mainActivity)
-        if (!isAdmin.value && FirebaseAuth.getInstance().currentUser != null) { // admins & unauthenticated users do not see cart button
+        OrdersButton(navController, mainActivity, isAdmin)
+        if (!isAdmin && FirebaseAuth.getInstance().currentUser != null) { // admins & unauthenticated users do not see cart button
             /** Cart **/
             OutlinedButton(
                 modifier = Modifier.width(100.dp),
@@ -74,12 +70,12 @@ fun MainScreen(
                 Text(text = (cart.value?.cartSize ?: 0).toString(),
                     style = TextStyle(textAlign = TextAlign.Center, color = Color.White),
                     modifier = Modifier
-                        .width(20.dp)
                         .height(20.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(Color.Black))
+                        .background(Color.Black)
+                        .padding(start = 4.dp, end = 4.dp))
             }
-        } else if (isAdmin.value) {
+        } else if (isAdmin) {
             /** Add new item to app-item list **/
             OutlinedButton(
                 onClick = {
@@ -108,21 +104,20 @@ fun MainScreen(
             painterResource(R.drawable.logo),
             contentDescription = "",
             contentScale = ContentScale.Crop,
-            modifier = Modifier.padding(top = 32.dp)
+            modifier = Modifier.padding(top = 8.dp)
         )
         /** Admin only View */
-        if (isAdmin.value) {
-
+        if (isAdmin) {
             RenderMaterials(navController = navController, sharedViewModel = sharedViewModel)
         }
         /** User + Admin view */
-        RenderItems(navController = navController, sharedViewModel = sharedViewModel)
+        RenderItems(navController = navController, sharedViewModel = sharedViewModel, isAdmin)
     }
 }
 
 @Composable
-fun OrdersButton(navController: NavController, mainActivity: MainActivity) {
-    if (!isAdmin.value) { // User Order History page
+fun OrdersButton(navController: NavController, mainActivity: MainActivity, isAdmin: Boolean) {
+    if (AuthInfo.user != null && !isAdmin) { // User Order History page
         OutlinedButton(
             onClick = {
                 if (AuthInfo.user != null) // only logged in users are allowed
@@ -136,10 +131,10 @@ fun OrdersButton(navController: NavController, mainActivity: MainActivity) {
         ) {
             Text(text = "My Orders")
         }
-    } else { //  Admin Order History page
+    } else if (isAdmin) { //  Admin Order History page
         OutlinedButton(
             onClick = { navController.navigate(route = Screens.OrdersScreenAdmin.route) }
-        ) { Text(text = "Order History") }
+        ) { Text(text = "Daily Summary") }
     }
 }
 
@@ -173,6 +168,7 @@ private fun AuthButton(
 fun RenderItems(
     navController: NavController,
     sharedViewModel: SharedViewModel,
+    isAdmin: Boolean,
 ) {
     /**
      * Retrieves item data from firebase and composes it on screen
@@ -195,7 +191,7 @@ fun RenderItems(
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-        if (!isAdmin.value) { // admins do not see the menu
+        if (!isAdmin) { // admins do not see the menu
             itemHeader(text = "Menu")
             ProductItemList(products)
             { product ->
@@ -206,10 +202,19 @@ fun RenderItems(
                             Toast.LENGTH_LONG).show()
                     } else {
                         CartRepository.cart.value = cart?.addItemIncrease(product)
-                        OrderRepository.setLimitCap(dateAsString(LocalDateTime.now()),product)
+                        OrderRepository.setLimitCap(dateAsString(LocalDateTime.now()), product)
                     }
                 }
             }
+
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.caption,
+                text = "Minimum order quantity: 50"
+            )
         }
     }
 }
@@ -262,6 +267,7 @@ fun ProductItemList(
         modifier = Modifier
             .clip(RoundedCornerShape(16.dp))
             .background(Color(243, 226, 204, 255))
+            .fillMaxHeight(0.65f)
             .padding(16.dp),
         horizontalArrangement = Arrangement.Center
     ) {
@@ -354,7 +360,7 @@ fun MaterialsList(
 ) {
     LazyColumn(
         modifier = Modifier
-            .fillMaxHeight(0.5f)
+            .fillMaxHeight(0.4f)
             .fillMaxWidth()
             .border(border = BorderStroke(1.dp, Color.LightGray), RoundedCornerShape(8.dp))
             .padding(8.dp)

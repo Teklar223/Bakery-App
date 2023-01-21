@@ -1,11 +1,14 @@
 package com.example.bakeryapp.util
 
 import android.os.Build
+import android.os.StrictMode
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bakeryapp.util.*
+import com.example.bakeryapp.util.AuthInfo.isAdmin
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.AuthResult
@@ -19,6 +22,10 @@ import kotlinx.coroutines.tasks.await
 import java.time.LocalDateTime
 import com.google.firebase.auth.*
 import com.google.firebase.firestore.auth.User
+import org.json.JSONArray
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.TemporalField
@@ -31,6 +38,13 @@ import java.time.temporal.TemporalField
  */
 class SharedViewModel : ViewModel() {
     val loadingState = MutableStateFlow(LoadingState.IDLE)
+
+    init {
+        viewModelScope.launch {
+            isAdmin.value = checkAdmin(AuthInfo.user?.uid)
+            Log.d("ISADMIN", isAdmin.toString())
+        }
+    }
 
     suspend fun getTodayOrders(): List<OrdersDataPopulated> {
         return withContext(Dispatchers.IO) {
@@ -207,7 +221,7 @@ class SharedViewModel : ViewModel() {
             val order = OrdersData(
                 userId = user.uid,
                 list = itemList,
-                userName= user.email!!.split("@")[0],
+                userName = user.email!!.split("@")[0],
                 totalPrice = totalCost,
                 date = localDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
             )
@@ -222,31 +236,94 @@ class SharedViewModel : ViewModel() {
 /* ***************************** Items and Materials ************************************ */
 /* ************************************************************************************** */
 
-    suspend fun getItems() = CoroutineScope(Dispatchers.IO).async {
-        return@async Firebase.firestore
-            .collection(itemsCol)
-            .get()
-            .tryAwaitList(ItemData::class.java)
-    }.await()
+//------------------------------------------Items------------------------------------------//
 
-    suspend fun getMaterials() = CoroutineScope(Dispatchers.IO).async {
-        return@async Firebase.firestore
-            .collection(materialsCol)
-            .get()
-            .tryAwaitList(MaterialsData::class.java)
-    }.await()
+    suspend fun getItems(): List<ItemData> = coroutineScope {
+        StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().permitAll().build())
+        val url = URL("http://192.168.56.1:3000/items")
+
+        val con = url.openConnection() as HttpURLConnection
+        con.requestMethod = "GET"
+        con.connectTimeout = 5000
+        con.readTimeout = 5000
+        con.connect()
+
+        val jsonString = con.inputStream.use { it.reader().readText() }
+        convertToItemDataList(JSONArray(jsonString))
+    }
+
+    fun convertToItemDataList(jsonArray: JSONArray): List<ItemData> {
+        val itemDataList = mutableListOf<ItemData>()
+        for (i in 0 until jsonArray.length()) {
+            val jsonObject = jsonArray.getJSONObject(i)
+            val itemData = ItemData(
+                jsonObject.getString("itemId"),
+                jsonObject.getString("name"),
+                jsonObject.getString("image"),
+                jsonObject.getString("description"),
+                jsonObject.getInt("limit"),
+                jsonObject.getInt("cost"),
+                jsonObject.getString("currency")
+            )
+            itemDataList.add(itemData)
+        }
+        return itemDataList
+    }
+//------------------------------------------Materials------------------------------------------//
+
+    suspend fun getMaterials(): List<MaterialsData> = coroutineScope {
+        StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().permitAll().build())
+        val url = URL("http://192.168.56.1:3000/materials")
+
+        val con = url.openConnection() as HttpURLConnection
+        con.requestMethod = "GET"
+        con.connectTimeout = 5000
+        con.readTimeout = 5000
+        con.connect()
+
+        val jsonString = con.inputStream.use { it.reader().readText() }
+        convertToMaterialDataList(JSONArray(jsonString))
+    }
+
+    fun convertToMaterialDataList(jsonArray: JSONArray): List<MaterialsData> {
+        val materialDataList = mutableListOf<MaterialsData>()
+        for (i in 0 until jsonArray.length()) {
+            val jsonObject = jsonArray.getJSONObject(i)
+            val materialData = MaterialsData(
+                jsonObject.getString("materialId"),
+                jsonObject.getString("name"),
+                jsonObject.getString("description"),
+                jsonObject.getInt("cost"),
+                jsonObject.getString("currency"),
+                jsonObject.getString("unit"),
+                jsonObject.getString("contactInfoName"),
+                jsonObject.getString("contactInfoPhone"),
 
 
+
+            )
+            materialDataList.add(materialData)
+        }
+        return materialDataList
+    }
+
+//-----------------------------------------Admin Check---------------------------------------------/
     // modified here to direct fetch by id
-    suspend fun checkAdmin(userId: String?) = CoroutineScope(Dispatchers.IO).async {
-        if (userId == null) return@async false
-        return@async Firebase.firestore
-            .collection(adminsCol)
-            .document(userId)
-            .get()
-            .await()
-            .exists()
-    }.await()
+
+    suspend fun checkAdmin(userId: String?) : Boolean = coroutineScope {
+        StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().permitAll().build())
+        val url = URL("http://192.168.56.1:3000/adminCheck?userID="+userId)
+
+        val con = url.openConnection() as HttpURLConnection
+        con.requestMethod = "GET"
+        con.connectTimeout = 5000
+        con.readTimeout = 5000
+        con.connect()
+
+        val jsonString = con.inputStream.use { it.reader().readText() }
+        Log.d("lllllllll",jsonString)
+        return@coroutineScope jsonString=="true"
+    }
 }
 
 /* ************************************************************************************** */

@@ -1,5 +1,5 @@
 package com.example.bakeryapp.util
-
+fun String.minus(x: Int) = Integer.parseInt(this) - x
 /* Data logic collection */
 const val ordersCol = "orders"
 const val itemsCol = "items"
@@ -11,6 +11,9 @@ const val adminsCol = "admins"
 
 /* Business logic constants */
 const val ordersToShow = 10
+
+const val defaultIncreaseBy = 50
+
 
 /* Common classes */
 

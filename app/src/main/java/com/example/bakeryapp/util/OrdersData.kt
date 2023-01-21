@@ -25,7 +25,7 @@ data class OrdersData(
     var date: Long = 0
 ) {
     constructor() : this("","", "", mutableListOf())
-    constructor(userId: String,userName:String, list: MutableList<OrderItem>) : this("", userId,userName, list)
+    constructor(userId: String, userName:String, list: MutableList<OrderItem>) : this("", userId, userName, list)
 }
 
 data class OrderItem(

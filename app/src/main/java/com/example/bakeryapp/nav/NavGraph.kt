@@ -1,35 +1,40 @@
 package com.example.bakeryapp.nav
 
-import android.os.Build
-import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.bakeryapp.MainActivity
 import com.example.bakeryapp.screen.*
+import com.example.bakeryapp.util.AuthInfo.isAdmin
 import com.example.bakeryapp.util.SharedViewModel
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavGraph(
     navController: NavHostController,
     sharedViewModel: SharedViewModel,
-    mainActivity: MainActivity
-){
+    mainActivity: MainActivity,
+) {
     NavHost(
         navController = navController,
         startDestination = Screens.MainScreen.route
-    ){
+    ) {
 
         /** *** MAIN SCREEN *** **/
         composable(
             route = Screens.MainScreen.route
-        ){
-            MainScreen(
+        ) {
+            if (isAdmin.value == null)
+                Text(text = "Loading...", modifier = Modifier.padding(16.dp))
+            else MainScreen(
                 navController = navController,
                 sharedViewModel = sharedViewModel,
-                mainActivity = mainActivity
+                mainActivity = mainActivity,
+                isAdmin = isAdmin.value!!
             )
         }
 
@@ -44,10 +49,21 @@ fun NavGraph(
             )
         }
 
+        /** *** LOGIN SCREEN *** **/
+        composable(
+            route = Screens.RegisterScreen.route
+        ) {
+            RegisterScreen(
+                navController = navController,
+                sharedViewModel = sharedViewModel,
+                mainActivity = mainActivity
+            )
+        }
+
         /** *** CART SCREEN *** **/
         composable(
             route = Screens.CartScreen.route
-        ){
+        ) {
             CartScreen(
                 navController = navController,
                 sharedViewModel = sharedViewModel
@@ -57,7 +73,7 @@ fun NavGraph(
         /** *** ORDERS SCREEN *** **/
         composable(
             route = Screens.OrdersScreenAdmin.route
-        ){
+        ) {
             OrdersScreenAdmin(
                 navController = navController,
                 sharedViewModel = sharedViewModel
@@ -67,7 +83,7 @@ fun NavGraph(
         /** *** ORDERS SCREEN *** **/
         composable(
             route = Screens.OrdersScreen.route
-        ){
+        ) {
             OrdersScreen(
                 navController = navController,
                 sharedViewModel = sharedViewModel
@@ -77,7 +93,7 @@ fun NavGraph(
         /** *** ADD ITEM SCREEN *** **/
         composable(
             route = Screens.AddItemScreen.route
-        ){
+        ) {
             AddItemScreen(
                 navController = navController,
                 sharedViewModel = sharedViewModel
@@ -86,7 +102,7 @@ fun NavGraph(
         /** *** ADD MATERIAL SCREEN *** **/
         composable(
             route = Screens.AddMaterialScreen.route
-        ){
+        ) {
             AddMaterialScreen(
                 navController = navController,
                 sharedViewModel = sharedViewModel

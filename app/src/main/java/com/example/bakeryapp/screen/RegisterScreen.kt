@@ -1,46 +1,34 @@
 package com.example.bakeryapp.screen
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.example.bakeryapp.R
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.ExitToApp
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.bakeryapp.MainActivity
-import com.example.bakeryapp.nav.Screens
 import com.example.bakeryapp.util.AuthInfo
 import com.example.bakeryapp.util.LoadingState
 import com.example.bakeryapp.util.SharedViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun LoginScreen(
+fun RegisterScreen(
     navController: NavController,
     sharedViewModel: SharedViewModel,
     mainActivity: MainActivity,
@@ -75,7 +63,7 @@ fun LoginScreen(
                     backgroundColor = Color.White,
                     elevation = 1.dp,
                     title = {
-                        Text(text = "Login")
+                        Text(text = "Register")
                     },
                     navigationIcon = {
                         IconButton(onClick = { navController.popBackStack() }) {
@@ -127,49 +115,40 @@ fun LoginScreen(
                         }
                     )
 
-                    /** Login Button*/
+                    /** Register Button*/
                     Button(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
                         enabled = userEmail.isNotEmpty() && userPassword.isNotEmpty(),
                         content = {
-                            Text(text = "Login")
-                        },
-                        onClick = {
-                            scope.launch {
-                                sharedViewModel.signInWithEmailAndPassword(
-                                    email = userEmail.trim(),
-                                    password = userPassword.trim(),
-                                    { mainActivity.reloadActivity() }, /* positive result */
-                                    {
-                                        mainActivity.reloadActivity()
-                                        Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG)
-                                            .show() /* negative result */
-                                    }
-                                )
-                            }
-                        }
-                    )
-
-                    /** Register Button*/
-                    Button(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        content = {
                             Text(text = "Register")
                         },
                         onClick = {
-                            navController.navigate(Screens.RegisterScreen.route)
+                            if (userPassword.length > 6) {
+                                scope.launch {
+                                    sharedViewModel.registerWithEmailAndPassword(
+                                        email = userEmail.trim(),
+                                        password = userPassword.trim(),
+                                        { mainActivity.reloadActivity() }, /* positive result */
+                                        {
+                                            Toast.makeText(
+                                                mainActivity,
+                                                it.message,
+                                                Toast.LENGTH_LONG
+                                            )
+                                                .show() /* negative result */
+                                        }
+                                    )
+                                }
+                            } else {
+                                Toast.makeText(
+                                    mainActivity,
+                                    "Password must be longer than 6 characters!",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
                         }
-                    )
-
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.caption,
-                        text = "You can also login with the socials below"
                     )
 
                     /** login Success/Failure message */
@@ -183,56 +162,7 @@ fun LoginScreen(
                         }
                         else -> {}
                     }
-
                     Spacer(modifier = Modifier.height(18.dp))
-
-                   googleButton(launcher = launcher) /* removed 19-01*/
-
-                }
-            )
-        }
-    )
-}
-
-@Composable
-private fun googleButton(launcher: ManagedActivityResultLauncher<Intent, ActivityResult>) {
-    val context = LocalContext.current
-    val token = stringResource(R.string.default_web_client_id)
-    OutlinedButton(
-        border = ButtonDefaults.outlinedBorder.copy(width = 1.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp),
-        onClick = {
-            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(token)
-                .requestEmail()
-                .build()
-
-            val googleSignInClient = GoogleSignIn.getClient(context, gso)
-            launcher.launch(googleSignInClient.signInIntent)
-        },
-        content = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                content = {
-                    Icon(
-                        tint = Color.Unspecified,
-                        painter = painterResource(id = com.firebase.ui.auth.R.drawable.googleg_standard_color_18),
-                        contentDescription = null,
-                    )
-                    Text(
-                        style = MaterialTheme.typography.button,
-                        color = MaterialTheme.colors.onSurface,
-                        text = "Google"
-                    )
-                    Icon(
-                        tint = Color.Transparent,
-                        imageVector = Icons.Default.MailOutline,
-                        contentDescription = null,
-                    )
                 }
             )
         }

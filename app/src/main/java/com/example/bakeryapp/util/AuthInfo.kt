@@ -12,5 +12,5 @@ import com.google.firebase.auth.FirebaseUser
 object AuthInfo {
     lateinit var auth: FirebaseAuth
     var user: FirebaseUser? = null
-    lateinit var isAdmin: MutableState<Boolean>
+    var isAdmin: MutableState<Boolean?> = mutableStateOf(null)
 }

@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "bakeryfirestore",
+  "private_key_id": "d0ecf3f452d475eb1eaa82a2243039b34d0a3e29",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCvSwBDAlqjdgUf\nxDMF4YPct0biFsvEF8u18OigSDMRieDbOtpL1yF7oa+qma1rRIuvDD2hS0JVYqD4\nsjyciuEk8CcTbtj6OxjVE0aiNcyjRT4WJhSMSRV5KsTPJR2Tn+41wE5SyRIv/WTL\nov9BajbSkcNBPbYv8czunVkQfhfWdWvtZQh8p6245FLPyIAQO8O2bCce+v8DRzyg\nq2Bzfu7F46r8VYmfTQhHFak8bKnZjerzehLwKYSmCmbFH7cQXALT3L0T5MZ4EaVa\nBsgMNQsRrib+JlkKjUGEGSHLgPX180eav5VJDh1zEh4Yjscs6DSAP6qH+ICHx4PL\nPzGi+Ve3AgMBAAECggEAAccAZy2IbrzdG2/ZVpdtR1kiYlt50HCvU5ZwPWPOBMEB\noydrHDa/s6m1hsTNIdfNlMZKf66sKwJ3gF4KSEoOM1ouAz/t+keMHmj2H+Hsw8EJ\nep8DOVLqYVKiMTl+nccS2r+q66L3SL5IfdoWvXqOuL7anHg8Nys7+TVmOEkXA8kj\ntcYMOagmpQMWew6uALTbfwXkf7ggu4IWmDjd4wSGxUOXvgIYeYL3TLb9UvKiA1RY\n6IZAI0pVeNEt1CKPwh2srxvPdavr/iRlvITgiUSRM1yq2xQw20X29Fq2kK56CQGU\nwC0r4TU4Gvf2VmkKAJK6m4zmyEqJ/4kZu7AyvzGqaQKBgQDUJhYHU869ETXvPfVR\nUsvSeOVFsB9osuOYDEcU5Vy3wzN8LmhesG8VyVgkyK7/HYz1oZUJVvPcRIsT0k5v\nitNNIh/biUCkb69cf/aWf79W1rag/DBnYRtn049f2jXtel34TUBl+PLVZ9sNpHh9\nbfNBmzvgUH00z6xZV853CBRKDwKBgQDThq34OE4iGNsUusrgYpJYJhHBaf5HSPIl\nhP8f36XcK/Z9KhBsxRcJiWEKvJH0t6CNvIxd8/KF17YqkZVp7u0lHZxNCKoKgfko\nVIeZtBnVY6ltEGPEBflfDnmbpom+5/ymp95SCDgN/bSJ22HUx1fjkcv+Jsq9Jawc\nFdm8MAVf2QKBgQDJPWOSCc7HjEbkLZrCTM7pVSLvSxVQRLkeJy9aRAQCkNkKyB7b\nC3Qkb3z8T52ohIiNDHyKgoAKhr6Cy/D5X+/2cBNWNckq8oKfNQddVcrT/hL5fKAR\nwIy1nXqYiy6ymWwAOI+I63C2PLEPLN/a42xn5HAU5WUPrpunmGJSiUhtwwKBgDTR\nw61g+fm/tS02+6QOWTbTwslGW22XhIfj7wUZhsQ04icdEt7mVDtYZ7gToGq4U8ow\n0+g+G0hati1pDyNVuzfybe46hKN9EyeD/BxggbbsXQlT92WijEO1TJ6Wdn0KVueS\nsYxQaxbrTGLEOmi0oni8FnFPZH7Y4mJc/nLkluL5AoGAB0Td9WIVRhtnfKcg9N4O\nEFgwVJPRs0ojIdvK0AmdBorxc/TNV8x9qXYKOu9M0xVOFClQIcQDxT9zyLKYCHzu\nmBTsLyUAvjCQ6IocY4KKVPPRdqIl2VJQSt7WQS7HWSCz9Kd4Q7mYSYpWZKEfK1m/\n3xMXpoUSikjjCvfhCQNnFkw=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-e9jkr@bakeryfirestore.iam.gserviceaccount.com",
+  "client_id": "101895549983212590415",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-e9jkr%40bakeryfirestore.iam.gserviceaccount.com"
+}

@@ -24,6 +24,7 @@ import com.google.firebase.auth.*
 import com.google.firebase.firestore.auth.User
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.LocalDate
@@ -72,6 +73,7 @@ class SharedViewModel : ViewModel() {
 /* ************************************* Auth ******************************************* */
 /* ************************************************************************************** */
 
+    //-------------------------------------login-------------------------------------------//
     fun signInWithEmailAndPassword(
         email: String,
         password: String,
@@ -95,6 +97,8 @@ class SharedViewModel : ViewModel() {
             loadingState.emit(LoadingState.error(e.localizedMessage))
         }
     }
+
+    //-----------------------------------------------------------------------------------------//
 
     fun registerWithEmailAndPassword(
         email: String,
@@ -321,7 +325,6 @@ class SharedViewModel : ViewModel() {
         con.connect()
 
         val jsonString = con.inputStream.use { it.reader().readText() }
-        Log.d("lllllllll",jsonString)
         return@coroutineScope jsonString=="true"
     }
 }

@@ -18,7 +18,7 @@ class OrderRepository {
             increaseBy: Int = defaultIncreaseBy,
         ) {
 
-            val newLimit = LimitCap(limit = itemData.limit + increaseBy)
+            val newLimit = LimitCap(limit = /*itemData.limit +*/ increaseBy)
             FirebaseFirestore
                 .getInstance()
                 .collection(limitCol)

@@ -1,10 +1,12 @@
 
+//required imports
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const firebase = require('firebase-admin');
 const serviceAccount = require("./bakeryfirestore_auth.json");
 
+//firebase cradentials required for connection
 firebase.initializeApp({
   credential: firebase.credential.cert(serviceAccount),
   databaseURL: "https://bakeryfirestore-default-rtdb.europe-west1.firebasedatabase.app"
@@ -12,6 +14,7 @@ firebase.initializeApp({
 
 const db = firebase.firestore();
 
+// get all items from the firebase
 app.get('/items', async (req, res) => {
     console.log("request incoming")
   const snapshot = await db.collection('items').get();
@@ -19,6 +22,7 @@ app.get('/items', async (req, res) => {
   res.send(items);
 });
 
+// get all materials from the firebase
 app.get('/materials', async (req, res) => {
   console.log("request incoming")
 const snapshot = await db.collection('materials').get();
@@ -26,13 +30,8 @@ const materials = snapshot.docs.map(doc => doc.data());
 res.send(materials);
 });
 
-app.get('/orders', async (req, res) => {
-  console.log("request incoming")
-const snapshot = await db.collection('orders').get();
-const orders = snapshot.docs.map(doc => doc.data());
-res.send(orders);
-});
 
+//check if use is admin or not, you pass the user id in query parameter
 app.get('/adminCheck', async (req, res) => {
   console.log("request incoming")
   let id = undefined;
@@ -54,32 +53,10 @@ app.get('/adminCheck', async (req, res) => {
   res.send(result);
 });
 
-app.get('/login', async (req, res) => {
-  console.log("request incoming")
-  let username = undefined;
-  let password = undefined;
-  if(req?.query){
-    username = req.query.username
-    password = req.query.password
-  }
-  else{
-    res.send(false)
-  }
-  const snapshot = await db.collection('admins').get();
-  const admins = snapshot.docs.map(doc => doc.id);
-  let result = false;
-  for(let item of admins){
-    if(item == id){
-      result = true
-      break;
-    }
-  }
-  res.send(result);
-});
-
 
 app.use(bodyParser.json());
 
+//add new item to database (as admin)
 app.post('/addItem', (req, res) => {
   console.log("request incoming")
   const itemData = req.body;
@@ -92,6 +69,7 @@ app.post('/addItem', (req, res) => {
     });
 });
 
+//add new material to database (as admin)
 app.post('/addMaterial', (req, res) => {
   console.log("request incoming")
   const materialData = req.body;
